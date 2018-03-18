@@ -62,7 +62,7 @@ func (s *Server) GetRpcAddr() string {
 
 func (s *Server) GetCometAddr() string {
 	websocketProtocol := s.config.Get("websocket_protocol").MustString("ws")
-	websocketHost := s.config.Get("websocketHost").MustString(":8900")
+	websocketHost := s.config.Get("websocket_host").MustString("127.0.0.1")
 	return fmt.Sprintf("%s://%s%s", websocketProtocol, websocketHost, s.wsAddr)
 }
 
