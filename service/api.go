@@ -1,4 +1,4 @@
-package rpc
+package service
 
 import (
 	"net/rpc"
@@ -34,16 +34,16 @@ func InitRpcServer(server contracts.Server) {
 	}
 }
 
-type Message struct {
-	To   	[]string	`json:"to"`	//消息接受者
-	Msg 	string		`json:"msg"` //为一个json，里边包含 type 消息类型
-}
-
 func (s *Server) SendToConnections(body string, reply *string) error {
 	//const messageMaxLen = 200
 	//if strings.Count(body, "") - 1 > messageMaxLen {
 	//	return errors.New(fmt.Sprintf("消息体过长，最大允许长度: %d", messageMaxLen))
 	//}
+
+	type Message struct {
+		To   	[]string	`json:"to"`	//消息接受者
+		Msg 	string		`json:"msg"` //为一个json，里边包含 type 消息类型
+	}
 
 	var message Message
 	if err := json.Unmarshal([]byte(body), &message); err != nil {

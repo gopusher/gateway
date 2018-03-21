@@ -10,8 +10,7 @@ import (
 	"github.com/fatih/color"
 	"encoding/json"
 	"reflect"
-	"bytes"
-	"io/ioutil"
+	"gopusher/comet/rpc"
 )
 
 type Server struct {
@@ -19,13 +18,14 @@ type Server struct {
 	apiAddr string
 	wsAddr string
 	rpcAddr string
+	rpcClient *rpc.Client
 	upgrader websocket.Upgrader
 	register chan *Client
 	unregister chan *Client
 	clients map[string]*Client
 }
 
-func NewWebSocketServer(config *config.Config) *Server {
+func NewWebSocketServer(config *config.Config, rpcClient *rpc.Client) *Server {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -43,6 +43,7 @@ func NewWebSocketServer(config *config.Config) *Server {
 		apiAddr: apiAddr,
 		wsAddr: wsAddr,
 		rpcAddr: rpcAddr,
+		rpcClient: rpcClient,
 		upgrader: upgrader,
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
@@ -97,13 +98,13 @@ func (s *Server) handleClients() {
 			s.clients[client.connId] = client
 
 			//上报给 router api 服务
-			if _, err := s.successRpc("Im", "online", client.connId, client.info, s.rpcAddr); err != nil {
+			if _, err := s.rpcClient.SuccessRpc("Im", "online", client.connId, client.info, s.rpcAddr); err != nil {
 				color.Red(err.Error())
 			}
 		case client := <-s.unregister:
 			log.Println("[info] 断开连接，connId:" + client.connId)
 			//上报给 router api 服务
-			if _, err := s.successRpc("Im", "offline", client.connId, client.info, s.rpcAddr); err != nil {
+			if _, err := s.rpcClient.SuccessRpc("Im", "offline", client.connId, client.info, s.rpcAddr); err != nil {
 				color.Red(err.Error())
 			}
 
@@ -116,72 +117,6 @@ func (s *Server) handleClients() {
 	}
 }
 
-func (s Server) doRpc(class string, method string, args ...interface{}) (string, error) {
-	type RpcBody struct {
-		ClassName	string	`json:"class"`
-		MethodName 	string	`json:"method"`
-		Args		[]interface{}	`json:"args"`
-	}
-	body, err := json.Marshal(&RpcBody{
-		ClassName: class,
-		MethodName: method,
-		Args: args,
-	})
-
-	apiUrl := s.config.Get("rpc_api_url").String()
-	req, err := http.NewRequest("POST", apiUrl, bytes.NewBuffer(body))
-	if err != nil {
-		return "", errors.New("请求失败:" + err.Error())
-	}
-	req.Header.Set("User-Agent", s.config.Get("rpc_user_agent").String())
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 200 {
-		ret, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return "", err
-		}
-		return string(ret), nil
-	}
-
-	ret, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", errors.New(fmt.Sprintf("请求异常%d: %v", resp.StatusCode, err.Error()))
-	}
-
-	return "", errors.New(fmt.Sprintf("请求异常%d: %v", resp.StatusCode, string(ret)))
-}
-
-func (s Server) successRpc(class string, method string, args ...interface{}) (string, error) {
-	ret, err := s.doRpc(class, method, args...)
-	if err != nil {
-		return "", err
-	}
-
-	type RetInfo struct {
-		Code int `code`
-		Data interface{} `data`
-		Error string `error`
-	}
-
-	var retInfo RetInfo
-	if err := json.Unmarshal([]byte(ret), &retInfo); err != nil {
-		color.Red("消息体异常, 不能解析 %v %v", ret, reflect.TypeOf(ret))
-		return "", errors.New("消息体异常, 不能解析")
-	}
-
-	if retInfo.Code != 0 {
-		return "", errors.New(retInfo.Error)
-	}
-
-	return ret, nil
-}
 
 func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
 	//检查是否是有效连接
@@ -234,7 +169,7 @@ func (s Server) checkToken(query map[string][]string) (*TokenInfo, error) {
 		return nil, errors.New("消息体异常, 不能解析")
 	}
 
-	if _, err := s.successRpc("Im", "checkToken", tokenInfo.ConnId, tokenInfo.Token, tokenInfo.Info, s.GetCometAddr()); err != nil {
+	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", tokenInfo.ConnId, tokenInfo.Token, tokenInfo.Info, s.GetCometAddr()); err != nil {
 		color.Red(err.Error())
 		return nil, errors.New("授权失败" + err.Error())
 	}
