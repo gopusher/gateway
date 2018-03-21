@@ -2,7 +2,7 @@
 
 > 支持包括 TCP、WebSocket 等多种通信协议接入，支持包括 Json、Redis 等多种消息协议
 
-# 编译
+## 编译
 ```
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 ```
@@ -11,3 +11,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 ```
 ./chat -c ./comet.ini
 ```
+
+## TODO 
+* 增加 rpc 方法获取服务 status
+* 增加服务负载自检，过载则回调路由服务停止对当前机器的服务下发，防止更多的客户端连接
