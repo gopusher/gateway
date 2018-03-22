@@ -45,14 +45,28 @@ func (s *Server) SendToConnections(body string, reply *string) error {
 		Msg 	string		`json:"msg"` //为一个json，里边包含 type 消息类型
 	}
 
+	type Response struct {
+		ErrIds	[]string	`json:"error_ids"`
+		ErrInfo	string		`json:"error_info"`
+	}
+
 	var message Message
 	if err := json.Unmarshal([]byte(body), &message); err != nil {
 		color.Red("消息体异常, 不能解析 %v %v", body, reflect.TypeOf(body))
-		return errors.New("消息体异常, 不能解析")
+
+		response, _ := json.Marshal(&Response{
+			ErrIds: []string{},
+			ErrInfo: "消息体异常, 不能解析",
+		})
+		return errors.New(string(response))
 	}
 
-	if err := s.server.SendToConnections(message.To, message.Msg); err != nil {
-		return errors.New("消息发送失败" + err.Error())
+	if errIds, err := s.server.SendToConnections(message.To, message.Msg); err != nil {
+		response, _ := json.Marshal(&Response{
+			ErrIds: errIds,
+			ErrInfo: "存在消息发送失败" + err.Error(),
+		})
+		return errors.New(string(response))
 	}
 
 	*reply = "消息发送成功"

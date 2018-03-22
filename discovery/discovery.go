@@ -82,7 +82,7 @@ func (discovery *Discovery) addComet(nodeName string, value string) {
 	fmt.Println("增加节点: " + nodeName)
 
 	if _, err := discovery.rpcClient.SuccessRpc("Im", "addCometServer", nodeName, value); err != nil {
-		color.Red(err.Error())
+		color.Red("增加节点失败>> " + err.Error())
 	}
 }
 
@@ -90,6 +90,6 @@ func (discovery *Discovery) delComet(nodeName string) {
 	fmt.Println("移除节点: " + nodeName)
 
 	if _, err := discovery.rpcClient.SuccessRpc("Im", "removeCometServer", nodeName); err != nil {
-		color.Red(err.Error())
+		color.Red("移除节点>> " + err.Error())
 	}
 }

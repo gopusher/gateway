@@ -177,28 +177,35 @@ func (s Server) checkToken(query map[string][]string) (*TokenInfo, error) {
 	return &tokenInfo, nil
 }
 
-func (s *Server) SendToConnections(to []string, msg string) error {
+func (s *Server) SendToConnections(to []string, msg string) ([]string, error) {
+	var errIds []string
 	for _, id := range to {
 		if err := s.SendToConnection(id, msg); err != nil {
-			//todo 优化：将失败的放入数组返回或则记录日志和原因等
+			errIds = append(errIds, id)
 		}
 	}
+	if len(errIds) > 0 {
+		return errIds, errors.New("存在发送失败的消息")
+	}
 
-	return nil
+	return []string{}, nil
 }
 
 func (s *Server) SendToConnection(to string, msg string) error {
 	if client, ok := s.clients[to]; ok {
-		select {
-		case client.send <- []byte(msg):
-			log.Println("[info] SendToConnection " + to + ": " + msg)
-			return nil
-		default:
-			close(client.send)
-			delete(s.clients, to)
-			color.Red("发送消息失败, to: %s", to)
-			return errors.New(fmt.Sprintf("发送消息失败, to %s", to))
-		}
+		go func() {
+			select {
+			case client.send <- []byte(msg):
+				log.Println("[info] SendToConnection " + to + ": " + msg)
+				//return nil
+			default:
+				close(client.send)
+				delete(s.clients, to)
+				color.Red("发送消息失败, to: %s", to)
+				//return errors.New(fmt.Sprintf("发送消息失败, to %s", to))
+			}
+		}()
+		return nil
 	}
 
 	color.Red("发送消息失败, 客户端不在维护中, to: %s", to)
