@@ -26,7 +26,7 @@ type Server struct {
 }
 
 func NewWebSocketServer(config *config.Config, rpcClient *rpc.Client) *Server {
-	var upgrader = websocket.Upgrader{
+	var upgrader = websocket.Upgrader{ //todo 搞成配置
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
@@ -134,7 +134,7 @@ func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
 
 	client := &Client{
 		conn: c,
-		send: make(chan []byte, 256),
+		send: make(chan []byte, 1024), //todo 搞成配置
 		connId: tokenInfo.ConnId,
 		info: tokenInfo.Info,
 		server: s,
@@ -191,14 +191,11 @@ func (s *Server) SendToConnections(to []string, msg string) ([]string, error) {
 	return []string{}, nil
 }
 
-var cnt = 0
-
 func (s *Server) SendToConnection(to string, msg string) error {
 	if client, ok := s.clients[to]; ok {
 		select {
 		case client.send <- []byte(msg):
-			cnt++
-			log.Println("[info] SendToConnection " + to + ": " + msg + fmt.Sprintf(", cnt: %d", cnt))
+			//log.Println("[info] SendToConnection " + to + ": " + msg)
 			return nil
 		default:
 			delete(s.clients, to)

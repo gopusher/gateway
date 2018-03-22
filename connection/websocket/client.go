@@ -14,7 +14,7 @@ type Client struct {
 	server Server
 }
 
-const (
+const ( //TODO 搞成配置
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
 

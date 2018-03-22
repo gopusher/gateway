@@ -69,9 +69,13 @@ $s = microtime(true);
 //todo 这里的 ip 要注意
 $client = new JsonRPC();
 //'{ "from": "5ab22da3d237a", "to": "1", "type": "group", "contentType": "text", "content": "123" }'
-for ($i = 0; $i < 8500; $i++) {
+// $to = array_pad([], 8500, '5ab35b7a06103');
+// $r = $client->sendToConnections("10.0.1.131", 8901, $to, $argv[1]);
+// var_export($r);
+$num = 8500;
+$num = 100000;
+for ($i = 0; $i < $num; $i++) {
     $r = $client->sendToConnections("10.0.1.131", 8901, array_slice($argv, 2), $argv[1]);
-    // var_export($r);
 }
 $e = microtime(true);
 echo $e - $s;
