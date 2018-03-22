@@ -65,13 +65,13 @@ if (count($argv) < 3) {
     throw new Exception('消息发送参数格式: php ./example.php msg ...to');
 }
 
-$s = time();
+$s = microtime(true);
 //todo 这里的 ip 要注意
 $client = new JsonRPC();
 //'{ "from": "5ab22da3d237a", "to": "1", "type": "group", "contentType": "text", "content": "123" }'
-for ($i = 0; $i < 20000; $i++) {
+for ($i = 0; $i < 8500; $i++) {
     $r = $client->sendToConnections("10.0.1.131", 8901, array_slice($argv, 2), $argv[1]);
     // var_export($r);
 }
-$e = time();
+$e = microtime(true);
 echo $e - $s;

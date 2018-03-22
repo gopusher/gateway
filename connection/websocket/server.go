@@ -191,21 +191,22 @@ func (s *Server) SendToConnections(to []string, msg string) ([]string, error) {
 	return []string{}, nil
 }
 
+var cnt = 0
+
 func (s *Server) SendToConnection(to string, msg string) error {
 	if client, ok := s.clients[to]; ok {
-		go func() {
-			select {
-			case client.send <- []byte(msg):
-				log.Println("[info] SendToConnection " + to + ": " + msg)
-				//return nil
-			default:
-				close(client.send)
-				delete(s.clients, to)
-				color.Red("发送消息失败, to: %s", to)
-				//return errors.New(fmt.Sprintf("发送消息失败, to %s", to))
-			}
-		}()
-		return nil
+		select {
+		case client.send <- []byte(msg):
+			cnt++
+			log.Println("[info] SendToConnection " + to + ": " + msg + fmt.Sprintf(", cnt: %d", cnt))
+			return nil
+		default:
+			delete(s.clients, to)
+			close(client.send) //是否需要 关闭 chan 的时候，发送完毕所有的chan再关闭连接 ??
+			//client.Close()
+			color.Red("发送消息失败, to: %s", to)
+			return errors.New(fmt.Sprintf("发送消息失败, to %s", to))
+		}
 	}
 
 	color.Red("发送消息失败, 客户端不在维护中, to: %s", to)

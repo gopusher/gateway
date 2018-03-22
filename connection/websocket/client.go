@@ -36,6 +36,7 @@ var (
 func (c *Client) Write() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
+		// log.Println("[info] write失败")
 		ticker.Stop()
 		c.conn.Close()
 	}()
@@ -76,6 +77,7 @@ func (c *Client) Write() {
 
 func (c *Client) Read() {
 	defer func() {
+		//log.Println("[info] Read 失败")
 		c.server.unregister <- c
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
