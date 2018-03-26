@@ -17,3 +17,4 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 * 增加信号接管服务的平滑重启和关闭
 * 增加 rpc 方法获取服务 status
 * 增加服务负载自检，过载则回调路由服务停止对当前机器的服务下发，防止更多的客户端连接
+* 增加通信协议文档
