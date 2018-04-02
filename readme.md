@@ -69,6 +69,24 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
 ![消息发送接收时序图](https://raw.githubusercontent.com/Gopusher/comet/master/docs/%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E6%8E%A5%E6%94%B6%E6%97%B6%E5%BA%8F%E5%9B%BE.png)
 
+## 推送逻辑服务器(message server) 开发
+
+* Api 相关
+
+  > message服务需要提供api，供 monitor 服务 和 comet服务 回调
+
+  1. Comet 接入层服务上线回调接口
+  2. Comet 接入层服务下线回调接口
+  3. Comet 接入层服务校验Client 客户端Token接口
+  4. Comet 接入层服务通知message 服务 client 上线接口
+  5. Comet 接入层服务通知message 服务 client 下线接口
+
+* Rpc 相关
+
+  > message服务调用 Comet 服务发送消息
+
+  1. 消息发送接口
+
 ## TODO 
 
 * 增加对客户端连接超时的控制处理
