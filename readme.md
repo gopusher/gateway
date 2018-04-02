@@ -26,7 +26,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
    comet_service_name=comet
    # etcd server addr
    etcd_addr=127.0.0.1:2379
-   # 推送逻辑服务器(message server) addr
+   # 推送逻辑服务器(message 服务) addr
    rpc_api_url=http://msg.demo.com/im/index/rpc
    # 和 推送逻辑服务器(message server) rpc服务通信的 user-agent
    rpc_user_agent="CtxImRpc 1.0"
@@ -59,7 +59,9 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
    /chat -c=./comet.ini
    ```
 
-## Comet 服务启动流程
+## 时序图 
+
+> 推送逻辑服务器(message 服务) 是提供路由服务和业务逻辑服务等，需要由业务方自己实现([参考](https://github.com/Gopusher/message)).
 
 
 
