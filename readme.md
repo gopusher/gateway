@@ -67,6 +67,8 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
 ![client客户端上线下线时序图](https://raw.githubusercontent.com/Gopusher/comet/master/docs/Client%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8A%E7%BA%BF%E4%B8%8B%E7%BA%BF%E6%97%B6%E5%BA%8F%E5%9B%BE.png)
 
+![消息发送接收时序图](https://raw.githubusercontent.com/Gopusher/comet/master/docs/%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E6%8E%A5%E6%94%B6%E6%97%B6%E5%BA%8F%E5%9B%BE.png)
+
 ## TODO 
 
 * 增加对客户端连接超时的控制处理
