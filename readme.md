@@ -65,7 +65,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
 ![Comet 接入层服务启动时序图](https://raw.githubusercontent.com/Gopusher/comet/master/docs/Comet%20%E6%8E%A5%E5%85%A5%E5%B1%82%E6%9C%8D%E5%8A%A1%E5%90%AF%E5%8A%A8%E6%97%B6%E5%BA%8F%E5%9B%BE.png)
 
-
+![client客户端上线下线时序图](https://raw.githubusercontent.com/Gopusher/comet/master/docs/Client%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8A%E7%BA%BF%E4%B8%8B%E7%BA%BF%E6%97%B6%E5%BA%8F%E5%9B%BE.png)
 
 ## TODO 
 
