@@ -56,7 +56,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 4. comet 接入层服务启动
 
    ```
-   /chat -c=./comet.ini
+   ./chat -c=./comet.ini
    ```
 
 ## 时序图 
