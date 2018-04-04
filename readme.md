@@ -75,17 +75,104 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
   > message服务需要提供api，供 monitor 服务 和 comet服务 回调
 
-  1. Comet 接入层服务上线回调接口
-  2. Comet 接入层服务下线回调接口
+  - 路由 `POST $rpc_api_url`
+
+    `$rpc_api_url`是comet服务器配置中的`rpc_api_url`
+
+  - post 参数，即消息内容
+
+    ```
+    {
+        "class": "Im", //string 回调类，目前为固定的 "Im"
+        "method": "", //string 回调方法，分消息类型，下边具体描述
+        "args": [ //数组 回调方法参数
+            arg1,
+            arg2
+        ]
+    }
+    ```
+
+    具体回调的消息内容包含5类：
+
+   1.  Comet 接入层服务上线回调接口
+
+       ```
+       {
+           "class": "Im",
+           "method": "addCometServer",
+           "args": [
+               nodeName, //节点名 含 rpcAddr 地址的字符串
+               value	//节点值 json字符串 {protocol: 协议, rpc_addr: rpc地址, comet_addr: comet地址}
+           ]
+       }
+       ```
+
+   2. Comet 接入层服务下线回调接口
+
+       ```
+       {
+           "class": "Im",
+           "method": "removeCometServer",
+           "args": [
+               nodeName, //节点名 含 rpcAddr 地址的字符串
+           ]
+       }
+       ```
+
   3. Comet 接入层服务校验Client 客户端Token接口
+
+     ```
+     {
+         "class": "Im",
+         "method": "checkToken",
+         "args": [
+             ConnId, //ConnId
+             Token, //token
+             Info, //自定义client相关信息，在后续客户端连接成功后上线回调和下线回调中原样传递
+             cometAddr //分配的计入url,如 ws://comet.demo.com:8900
+         ]
+     }
+     ```
+
   4. Comet 接入层服务通知message 服务 client 上线接口
+
+     ```
+     {
+         "class": "Im",
+         "method": "online",
+         "args": [
+             ConnId, //ConnId
+             Info, //自定义client相关信息
+             rpcAddr //当前comet服务的rpc地址
+         ]
+     }
+     ```
+
   5. Comet 接入层服务通知message 服务 client 下线接口
+
+     ```
+     {
+         "class": "Im",
+         "method": "online",
+         "args": [
+             ConnId, //ConnId
+             Info, //自定义client相关信息
+             rpcAddr //当前comet服务的rpc地址
+         ]
+     }
+     ```
+
+  >  为了安全考虑，增加了header头`user-agent`，值为comet服务器配置中的`rpc_user_agent`，
 
 * Rpc 相关
 
   > message服务调用 Comet 服务发送消息
 
   1. 消息发送接口
+
+     [参考](https://github.com/Gopusher/message/blob/master/ctx_base/Service/Im/Child/JsonRPC.php)
+
+以上所有的接口都可以参考 [这个文件](https://github.com/Gopusher/message/blob/95a6a8839403cb00996e7e634b97f471d4e4dca3/ctx_base/Service/Im/Ctx.php) 实现.
 
 ## TODO 
 
