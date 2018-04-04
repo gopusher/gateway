@@ -96,7 +96,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
    1.  Comet 接入层服务上线回调接口
 
-       > 回调发生在 Comet 接入层服务上下线时序图第 5 步
+       > 回调发生在 Comet 接入层服务上下线时序图第 5 步，message 服务回调实现可以参考[这个文件](https://github.com/Gopusher/message/blob/master/ctx_base/Service/Im/Ctx.php)中`_addCometServer`的comet服务上线方法实现
 
        ```
        {
@@ -111,7 +111,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
    2. Comet 接入层服务下线回调接口
 
-       > 回调发生在 Comet 接入层服务上下线时序图第 5 步
+       > 回调发生在 Comet 接入层服务上下线时序图第 5 步，message 服务回调实现可以参考[这个文件](https://github.com/Gopusher/message/blob/master/ctx_base/Service/Im/Ctx.php)中`_removeCometServer`的comet服务下线方法实现
 
        ```
        {
@@ -163,7 +163,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
   4. Comet 接入层服务通知message 服务 client 上线接口
 
-     > 回调发生在 客户端上下线时序图中第4步
+     > 回调发生在 客户端上下线时序图中第4步，message 服务回调实现可以参考[这个文件](https://github.com/Gopusher/message/blob/master/ctx_base/Service/Im/Ctx.php)中`_online`的客户端上线回调方法实现
 
      ```
      {
@@ -179,7 +179,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
   5. Comet 接入层服务通知message 服务 client 下线接口
 
-     >  回调发生在 客户端上下线时序图中第5步
+     >  回调发生在 客户端上下线时序图中第5步，message 服务回调实现可以参考[这个文件](https://github.com/Gopusher/message/blob/master/ctx_base/Service/Im/Ctx.php)中`_offline`客户端下线回调方法的实现
 
      ```
      {
