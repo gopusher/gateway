@@ -96,6 +96,8 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
    1.  Comet 接入层服务上线回调接口
 
+       > 回调发生在 Comet 接入层服务上下线时序图第 5 步
+
        ```
        {
            "class": "Im",
@@ -109,6 +111,8 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
    2. Comet 接入层服务下线回调接口
 
+       > 回调发生在 Comet 接入层服务上下线时序图第 5 步
+
        ```
        {
            "class": "Im",
@@ -121,6 +125,29 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
   3. Comet 接入层服务校验Client 客户端Token接口
 
+     > 这里校验token相关的逻辑发生在 客户端上下线时序图中第3步，不过依赖第1步，所以message服务需要按照指定的方法提供url，否则客户端连接comet层将会失败，url生成规则参考如：
+     >
+     > ```
+     > <?php
+     > $cometAdrr = 'ws://comet.demo.com:8900';
+     > $connId = uniqid(); //分配给client唯一的接入id，如 uid + '平台' + uniqid()等.
+     > //自定义client相关信息 clientInfo ，在后续客户端连接成功后上线回调和下线回调中原样传递
+     > $token = md5($uid); //需要校验的token值
+     > $clientInfo = json_encode([
+     > 	'uid'       => $uid,
+     > ]);
+     > $t = rawurlencode(json_encode([
+     >     'conn_id'   => $connId,
+     >     'token'     => $token,
+     >     'host'      => $cometAdrr,
+     >     'info'      => $clientInfo, //client 其他可携带信息 string 类型 clientInfo
+     >
+     > ]));
+     >
+     > $url = sprintf('%s/ws?t=%s', $cometAdrr, $t);
+     > ```
+     > 具体还可以参考[这个文件](https://github.com/Gopusher/message/blob/master/ctx_base/Service/Im/Ctx.php)中的`getConnectInfo`生成url方法和`_checkToken`校验token方法的实现。
+
      ```
      {
          "class": "Im",
@@ -128,13 +155,15 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
          "args": [
              ConnId, //ConnId
              Token, //token
-             Info, //自定义client相关信息，在后续客户端连接成功后上线回调和下线回调中原样传递
+             Info, //自定义client相关信息 clientInfo ，在后续客户端连接成功后上线回调和下线回调中原样传递
              cometAddr //分配的计入url,如 ws://comet.demo.com:8900
          ]
      }
      ```
 
   4. Comet 接入层服务通知message 服务 client 上线接口
+
+     > 回调发生在 客户端上下线时序图中第4步
 
      ```
      {
@@ -149,6 +178,8 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
      ```
 
   5. Comet 接入层服务通知message 服务 client 下线接口
+
+     >  回调发生在 客户端上下线时序图中第5步
 
      ```
      {
