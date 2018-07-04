@@ -16,7 +16,7 @@ import (
 type Server struct {
 	config *config.Config
 	apiAddr string
-	wsAddr string
+	wsPort string
 	rpcAddr string
 	rpcClient *rpc.Client
 	upgrader websocket.Upgrader
@@ -35,13 +35,13 @@ func NewWebSocketServer(config *config.Config, rpcClient *rpc.Client) *Server {
 	}
 
 	apiAddr := config.Get("api_addr").String()
-	wsAddr := config.Get("websocket_port").MustString(":8900")
+	wsPort := config.Get("websocket_port").MustString(":8900")
 	rpcAddr := config.Get("rpc_addr").MustString("127.0.0.1:8901")
 
 	return &Server{
 		config: config,
 		apiAddr: apiAddr,
-		wsAddr: wsAddr,
+		wsPort: wsPort,
 		rpcAddr: rpcAddr,
 		rpcClient: rpcClient,
 		upgrader: upgrader,
@@ -64,7 +64,7 @@ func (s *Server) GetRpcAddr() string {
 func (s *Server) GetCometAddr() string {
 	websocketProtocol := s.config.Get("websocket_protocol").MustString("ws")
 	websocketHost := s.config.Get("websocket_host").MustString("127.0.0.1")
-	return fmt.Sprintf("%s://%s%s", websocketProtocol, websocketHost, s.wsAddr)
+	return fmt.Sprintf("%s://%s%s", websocketProtocol, websocketHost, s.wsPort)
 }
 
 // 启动 websocket server
@@ -72,17 +72,17 @@ func (s *Server) initWsServer() {
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/ws", s.serveWs)
 
-	log.Println("[info] websocket server start running: " + s.wsAddr)
+	log.Println("[info] websocket server start running: " + s.wsPort)
 	websocketProtocol := s.config.Get("websocket_protocol").MustString("ws")
 	if websocketProtocol == "ws" {
-		if err := http.ListenAndServe(s.wsAddr, serverMux); err != nil {
+		if err := http.ListenAndServe(s.wsPort, serverMux); err != nil {
 			log.Fatal("服务启动失败:" + err.Error())
 			panic(err)
 		}
 	} else {
 		wssCertPem := s.config.Get("wss_cert_pem").String()
 		wssKeyPem := s.config.Get("wss_key_pem").MustString("ws")
-		if err := http.ListenAndServeTLS(s.wsAddr, wssCertPem, wssKeyPem, serverMux); err != nil {
+		if err := http.ListenAndServeTLS(s.wsPort, wssCertPem, wssKeyPem, serverMux); err != nil {
 			log.Fatal("服务启动失败:" + err.Error())
 			panic(err)
 		}
