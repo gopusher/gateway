@@ -3,24 +3,30 @@ package main
 import (
 	"flag"
 	"runtime"
-	"context"
-	"time"
-
 	c "gopusher/comet/config"
 	"gopusher/comet/contracts"
 	"gopusher/comet/connection/websocket"
 	"gopusher/comet/service"
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	"log"
 	"fmt"
 	"encoding/json"
 	"gopusher/comet/discovery"
 	"gopusher/comet/rpc"
+	"github.com/fatih/color"
 )
+
+func getArgs() (filename *string, isMonitor *bool) {
+	filename = flag.String("c", "./comet.ini", "set config file path")
+	//是否为 monitor 节点
+	isMonitor = flag.Bool("m", false, "if running with monitor model")
+	flag.Parse()
+
+	return
+}
 
 func main() {
 	filename, isMonitor := getArgs()
+
 	config := c.NewConfig(*filename)
 	runtime.GOMAXPROCS(config.Get("max_proc").MustInt(runtime.NumCPU()))
 	cometServiceName := config.Get("comet_service_name").MustString("comet")
@@ -28,8 +34,9 @@ func main() {
 
 	rpcClient := rpc.NewClient(config)
 
+	discoveryService := discovery.NewDiscovery(etcdAddr, cometServiceName)
 	if *isMonitor {
-		discovery.Run(etcdAddr, cometServiceName, rpcClient)
+		discoveryService.Watch(addComet(rpcClient), delComet(rpcClient))
 		return
 	}
 	//todo 信号接管方便平滑重启（目前不处理以后增加
@@ -41,7 +48,7 @@ func main() {
 	go service.InitRpcServer(server)
 
 	//join cluster
-	joinCluster(config, etcdAddr, cometServiceName, server.GetRpcAddr(), server.GetCometAddr())
+	joinCluster(config, discoveryService, server.GetRpcAddr(), server.GetCometAddr())
 }
 
 func getCometServer(config *c.Config, rpcClient *rpc.Client) contracts.Server {
@@ -56,34 +63,14 @@ func getCometServer(config *c.Config, rpcClient *rpc.Client) contracts.Server {
 	}
 }
 
-func getArgs() (filename *string, isMonitor *bool) {
-	filename = flag.String("c", "./comet.ini", "set config file path")
-	//是否为 monitor 节点
-	isMonitor = flag.Bool("m", false, "if running with monitor model")
-	flag.Parse()
-
-	return
-}
-
-func joinCluster(config *c.Config, etcdServer []string, serviceName string, rpcAddr string, cometAddr string) {
-	key := fmt.Sprintf("/%s/%s", serviceName, rpcAddr)
-	ttl := 1
-
-	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   etcdServer,
-		DialTimeout: 5 * time.Second,
-	})
-	if err != nil {
-		panic(err)
-	}
-
+func joinCluster(config *c.Config, discoveryService *discovery.Discovery, rpcAddr string, cometAddr string) {
 	type etcdValue struct {
-		Protocol 	string `protocol`
-		RpcAddr 	string	`rpc_addr`
-		CometAddr	string	`comet_addr`
+		Protocol 	string `json:"protocol"`
+		RpcAddr 	string	`json:"rpc_addr"`
+		CometAddr	string	`json:"comet_addr"`
 	}
 
-	body, err := json.Marshal(&etcdValue{
+	body, _ := json.Marshal(&etcdValue{
 		Protocol: config.Get("socket_protocol").MustString("websocket"),
 		RpcAddr: rpcAddr,
 		CometAddr: cometAddr,
@@ -91,29 +78,25 @@ func joinCluster(config *c.Config, etcdServer []string, serviceName string, rpcA
 
 	log.Println(fmt.Sprintf("rpcAddr: %s, etcdValue: %s, 加入集群成功", rpcAddr, string(body)))
 
-	kv := clientv3.NewKV(client)
-	lease := clientv3.NewLease(client)
-	var curLeaseId clientv3.LeaseID = 0
+	discoveryService.KeepAlive(rpcAddr, string(body))
+}
 
-	for {
-		if curLeaseId == 0 {
-			leaseResp, err := lease.Grant(context.TODO(), int64(ttl + 2))
-			if err != nil {
-				goto SLEEP
-			}
+func addComet(rpcClient *rpc.Client) func(string, string) {
+	return func(node string, nodeInfo string) {
+		fmt.Println("增加节点: " + node)
 
-			if _, err := kv.Put(context.TODO(), key, string(body), clientv3.WithLease(leaseResp.ID)); err != nil {
-				goto SLEEP
-			}
-			curLeaseId = leaseResp.ID
-		} else {
-			//log.Printf("keepalive curLeaseId=%d\n", curLeaseId)
-			if _, err := lease.KeepAliveOnce(context.TODO(), curLeaseId); err == rpctypes.ErrLeaseNotFound {
-				curLeaseId = 0
-				continue
-			}
+		if _, err := rpcClient.SuccessRpc("Im", "addCometServer", node, nodeInfo); err != nil {
+			color.Red("增加节点失败>> " + err.Error())
 		}
-	SLEEP:
-		time.Sleep(time.Duration(ttl) * time.Second)
+	}
+}
+
+func delComet(rpcClient *rpc.Client) func(string) {
+	return func(node string) {
+		fmt.Println("移除节点: " + node)
+
+		if _, err := rpcClient.SuccessRpc("Im", "removeCometServer", node); err != nil {
+			color.Red("移除节点>> " + err.Error())
+		}
 	}
 }

@@ -2,42 +2,74 @@ package discovery
 
 import (
 	"context"
-	"github.com/coreos/etcd/clientv3"
 	"time"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+
+	"github.com/coreos/etcd/clientv3"
+	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	"fmt"
-	"log"
-	"gopusher/comet/rpc"
-	"github.com/fatih/color"
+	"github.com/coreos/etcd/mvcc/mvccpb"
 )
 
 type Discovery struct {
 	etcdServer []string
 	serviceName string
-	rpcClient *rpc.Client
 }
 
-func Run(etcdServer []string, serviceName string, rpcClient *rpc.Client) {
-	serviceName = fmt.Sprintf("/%s/", serviceName)
-
-	discovery := &Discovery{
+func NewDiscovery(etcdServer []string, serviceName string) *Discovery {
+	return &Discovery{
 		etcdServer: etcdServer,
-		serviceName: serviceName,
-		rpcClient: rpcClient,
+		serviceName: "/" + serviceName,
 	}
-
-	log.Println("monitor running...")
-	discovery.Watch(context.TODO())
 }
 
-func (discovery *Discovery) Watch(ctx context.Context) {
+func (discovery *Discovery) getClient() *clientv3.Client {
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   discovery.etcdServer,
 		DialTimeout: 5 * time.Second,
 	})
+
 	if err != nil {
 		panic(err)
 	}
+
+	return client
+}
+
+func (discovery *Discovery) KeepAlive(node string, nodeInfo string) {
+	key := fmt.Sprintf("%s/%s", discovery.serviceName, node)
+	ttl := 1
+	client := discovery.getClient()
+
+	kv := clientv3.NewKV(client)
+	lease := clientv3.NewLease(client)
+	var curLeaseId clientv3.LeaseID = 0
+
+	for {
+		if curLeaseId == 0 {
+			leaseResp, err := lease.Grant(context.TODO(), int64(ttl + 2))
+			if err != nil {
+				goto SLEEP
+			}
+
+			if _, err := kv.Put(context.TODO(), key, nodeInfo, clientv3.WithLease(leaseResp.ID)); err != nil {
+				goto SLEEP
+			}
+			curLeaseId = leaseResp.ID
+		} else {
+			//log.Printf("keepalive curLeaseId=%d\n", curLeaseId)
+			if _, err := lease.KeepAliveOnce(context.TODO(), curLeaseId); err == rpctypes.ErrLeaseNotFound {
+				curLeaseId = 0
+				continue
+			}
+		}
+	SLEEP:
+		time.Sleep(time.Duration(ttl) * time.Second)
+	}
+}
+
+func (discovery *Discovery) Watch(addClient func(string, string), removeClient func(string)) {
+	client := discovery.getClient()
+
 	defer client.Close()
 
 	var curRevision int64 = 0
@@ -51,7 +83,7 @@ func (discovery *Discovery) Watch(ctx context.Context) {
 		}
 
 		for _, kv := range rangeResp.Kvs {
-			discovery.addComet(string(kv.Key), string(kv.Value))
+			addClient(string(kv.Key), string(kv.Value))
 		}
 
 		// 从当前版本开始订阅
@@ -63,33 +95,17 @@ func (discovery *Discovery) Watch(ctx context.Context) {
 	watcher := clientv3.NewWatcher(client)
 	defer watcher.Close()
 
-	watchChan := watcher.Watch(ctx, discovery.serviceName, clientv3.WithPrefix(), clientv3.WithRev(curRevision))
+	watchChan := watcher.Watch(context.TODO(), discovery.serviceName, clientv3.WithPrefix(), clientv3.WithRev(curRevision))
 	for watchResp := range watchChan { // if ctx is Done, for loop will break
 		for _, event := range watchResp.Events {
 			switch event.Type {
 			case mvccpb.PUT:
 				//fmt.Println("PUT事件: " + string(event.Kv.Key) + ">>" + string(event.Kv.Value))
-				discovery.addComet(string(event.Kv.Key), string(event.Kv.Value))
+				addClient(string(event.Kv.Key), string(event.Kv.Value))
 			case mvccpb.DELETE:
 				//fmt.Println("DELETE事件: " + string(event.Kv.Key) + ">>" + string(event.Kv.Value))
-				discovery.delComet(string(event.Kv.Key))
+				removeClient(string(event.Kv.Key))
 			}
 		}
-	}
-}
-
-func (discovery *Discovery) addComet(nodeName string, value string) {
-	fmt.Println("增加节点: " + nodeName)
-
-	if _, err := discovery.rpcClient.SuccessRpc("Im", "addCometServer", nodeName, value); err != nil {
-		color.Red("增加节点失败>> " + err.Error())
-	}
-}
-
-func (discovery *Discovery) delComet(nodeName string) {
-	fmt.Println("移除节点: " + nodeName)
-
-	if _, err := discovery.rpcClient.SuccessRpc("Im", "removeCometServer", nodeName); err != nil {
-		color.Red("移除节点>> " + err.Error())
 	}
 }
