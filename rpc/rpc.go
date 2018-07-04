@@ -37,7 +37,7 @@ func (c Client) Send(class string, method string, args ...interface{}) (string, 
 	apiUrl := c.config.Get("rpc_api_url").String()
 	req, err := http.NewRequest("POST", apiUrl, bytes.NewBuffer(body))
 	if err != nil {
-		color.Red("rpc 求失败1 :" + err.Error())
+		color.Red("rpc 请求失败1 :" + err.Error())
 		return "", errors.New("请求失败:" + err.Error())
 	}
 	req.Header.Set("User-Agent", c.config.Get("rpc_user_agent").String())
@@ -47,7 +47,7 @@ func (c Client) Send(class string, method string, args ...interface{}) (string, 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		color.Red("rpc 求失败2 :" + err.Error())
+		color.Red("rpc 请求失败2 :" + err.Error())
 		return "", errors.New("请求失败:" + err.Error())
 	}
 
@@ -56,7 +56,7 @@ func (c Client) Send(class string, method string, args ...interface{}) (string, 
 	if resp.StatusCode == 200 {
 		ret, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			color.Red("rpc 求失败3，StatusCode 非 200:" + err.Error())
+			color.Red("rpc 请求失败3，StatusCode 非 200:" + err.Error())
 			return "", err
 		}
 		return string(ret), nil
