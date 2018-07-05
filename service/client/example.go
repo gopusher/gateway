@@ -28,7 +28,7 @@ func main() {
 	//连接远程rpc服务
 	//这里使用jsonrpc.Dial
 	//todo 这里的 ip 要注意
-	rpc, err := jsonrpc.Dial("tcp", "127.0.0.1:8901")
+	rpc, err := jsonrpc.Dial("tcp", "192.168.3.165:8901")
 	if err != nil {
 		log.Fatal(err)
 	}

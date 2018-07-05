@@ -40,13 +40,14 @@ class JsonRPC
         return json_decode($line,true);
     }
 
-    public function SendToConnections($host, $port, $to, $msg)
+    public function SendToConnections($host, $port, $token, $to, $msg)
     {
         $data = array(
             'method' => "Server.SendToConnections",
             'params' => [json_encode([
                 'to'    => (array) $to,
-                'msg'   => $msg
+                'msg'   => $msg,
+                'token' => $token
             ])],
         );
 
@@ -70,12 +71,12 @@ $s = microtime(true);
 $client = new JsonRPC();
 //'{ "from": "5ab22da3d237a", "to": "1", "type": "group", "contentType": "text", "content": "123" }'
 // $to = array_pad([], 8500, '5ab35b7a06103');
-// $r = $client->sendToConnections("10.0.1.131", 8901, $to, $argv[1]);
+// $r = $client->sendToConnections("192.168.3.165:8901", 'token', 8901, $to, $argv[1]);
 // var_export($r);
 $num = 8500;
 $num = 100000;
 for ($i = 0; $i < $num; $i++) {
-    $r = $client->sendToConnections("10.0.1.131", 8901, array_slice($argv, 2), $argv[1]);
+    $r = $client->sendToConnections("192.168.3.165", 8901, 'token', array_slice($argv, 2), $argv[1]);
 }
 $e = microtime(true);
 echo $e - $s;
