@@ -11,6 +11,7 @@ import (
 type Message struct {
 	To   	[]string	`json:"to"`	//消息接受者
 	Msg 	string		`json:"msg"` //为一个json，里边包含 type 消息类型
+	Token	string		`json:"token"` //作为消息发送鉴权
 }
 
 func main() {
@@ -21,6 +22,7 @@ func main() {
 	message, _ := json.Marshal(&Message{
 		To: os.Args[2:],
 		Msg: os.Args[1],
+		Token: "token",
 	})
 
 	//连接远程rpc服务

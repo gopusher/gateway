@@ -65,7 +65,7 @@ func getCometServer(config *c.Config, rpcClient *rpc.Client) contracts.Server {
 }
 
 func joinCluster(config *c.Config, discoveryService *discovery.Discovery, rpcAddr string) {
-	log.Println(fmt.Sprintf("rpcAddr: %s, etcdValue: %s, 加入集群成功", rpcAddr))
+	log.Println(fmt.Sprintf("rpcAddr: %s, etcdValue: %s, 加入集群成功", rpcAddr, rpcAddr))
 
 	discoveryService.KeepAlive(rpcAddr, rpcAddr)
 }

@@ -191,7 +191,7 @@ func (s *Server) SendToConnection(to string, msg string) error {
 	if client, ok := s.clients[to]; ok {
 		select {
 		case client.send <- []byte(msg):
-			//log.Println("[info] SendToConnection " + to + ": " + msg)
+			// log.Println("[info] SendToConnection " + to + ": " + msg)
 			return nil
 		default:
 			delete(s.clients, to)
