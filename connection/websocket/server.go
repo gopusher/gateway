@@ -86,10 +86,6 @@ func (s *Server) handleClients() {
 		select {
 		case client := <-s.register:
 			log.Println("[info] 注册客户端, connId: " + client.connId)
-			//关闭同名connId客户端连接
-			if c, ok := s.clients[client.connId]; ok {
-				s.unregister <- c
-			}
 
 			s.clients[client.connId] = client
 
@@ -119,6 +115,13 @@ func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
 	tokenInfo, err := s.checkToken(r.URL.Query())
 	if err != nil {
 		s.responseWsUnauthorized(w)
+		return
+	}
+
+	//存在相同connId客户端连接
+	if _, ok := s.clients[tokenInfo.ConnId]; ok {
+		w.Header().Set("Sec-Websocket-Version", "13")
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
