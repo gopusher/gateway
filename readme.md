@@ -204,6 +204,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 
 ## TODO 
 
+* 增加 kick client 的功能
 * 增加对客户端连接超时的控制处理
 * 增加信号接管服务的平滑重启和关闭
 * 增加 rpc 方法获取服务 status
