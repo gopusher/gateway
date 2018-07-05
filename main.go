@@ -9,7 +9,6 @@ import (
 	"gopusher/comet/service"
 	"log"
 	"fmt"
-	"encoding/json"
 	"gopusher/comet/discovery"
 	"gopusher/comet/rpc"
 	"github.com/fatih/color"
@@ -45,16 +44,18 @@ func main() {
 
 	go server.Run()
 
-	go service.InitRpcServer(server)
+	go service.InitRpcServer(server, config.Get("comet_rpc_token").MustString("token"))
 
 	//join cluster
-	joinCluster(config, discoveryService, server.GetRpcAddr(), server.GetCometAddr())
+	joinCluster(config, discoveryService, server.GetRpcAddr())
 }
 
 func getCometServer(config *c.Config, rpcClient *rpc.Client) contracts.Server {
-	socketProtocol := config.Get("socket_protocol").MustString("websocket")
+	socketProtocol := config.Get("socket_protocol").MustString("ws")
 	switch socketProtocol {
-	case "websocket":
+	case "ws":
+		fallthrough
+	case "wss":
 		return websocket.NewWebSocketServer(config, rpcClient)
 	case "tcp": //暂时不处理
 		panic("不支持的通信协议:" + socketProtocol)
@@ -63,22 +64,10 @@ func getCometServer(config *c.Config, rpcClient *rpc.Client) contracts.Server {
 	}
 }
 
-func joinCluster(config *c.Config, discoveryService *discovery.Discovery, rpcAddr string, cometAddr string) {
-	type etcdValue struct {
-		Protocol 	string `json:"protocol"`
-		RpcAddr 	string	`json:"rpc_addr"`
-		CometAddr	string	`json:"comet_addr"`
-	}
+func joinCluster(config *c.Config, discoveryService *discovery.Discovery, rpcAddr string) {
+	log.Println(fmt.Sprintf("rpcAddr: %s, etcdValue: %s, 加入集群成功", rpcAddr))
 
-	body, _ := json.Marshal(&etcdValue{
-		Protocol: config.Get("socket_protocol").MustString("websocket"),
-		RpcAddr: rpcAddr,
-		CometAddr: cometAddr,
-	})
-
-	log.Println(fmt.Sprintf("rpcAddr: %s, etcdValue: %s, 加入集群成功", rpcAddr, string(body)))
-
-	discoveryService.KeepAlive(rpcAddr, string(body))
+	discoveryService.KeepAlive(rpcAddr, rpcAddr)
 }
 
 func addComet(rpcClient *rpc.Client) func(string, string) {

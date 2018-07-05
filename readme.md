@@ -31,18 +31,15 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
    # 和 推送逻辑服务器(message server) rpc服务通信的 user-agent
    rpc_user_agent="CtxImRpc 1.0"
 
-   # 通信协议 可选项 websocket, tcp (目前仅支持websocket，tcp需要后续开发)
-   socket_protocol=websocket
-   # websockeet 监听地址
-   websocket_host=comet.demo.com
+   # 通信协议 协议，可选项 tcp(tcp需要后续开发), ws, wss (如果为 wss 需要设置 wss_cert_pem 和 wss_key_pem)
+   socket_protocol=ws
+   # websockeet 监听端口
    websocket_port=:8900
-   # websocket 协议，可选项 ws, wss (如果为 wss 需要设置 wss_cert_pem 和 wss_key_pem)
-   websocket_protocol=ws
-   # wss_cert_pem=/path/fullchain.pem
-   # wss_key_pem=/path/privkey.pem
-   # comet服务的 rpc 监听端口
+   # wss_cert_pem=
+   # wss_key_pem=
+   # rpc 监听端口
    rpc_addr=10.0.1.131:8901
-   # rpc_addr=192.168.31.86:8901
+   comet_rpc_token=token
    ```
 
 2. monitor 服务启动

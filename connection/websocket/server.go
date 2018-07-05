@@ -15,7 +15,6 @@ import (
 
 type Server struct {
 	config *config.Config
-	apiAddr string
 	wsPort string
 	rpcAddr string
 	rpcClient *rpc.Client
@@ -34,13 +33,11 @@ func NewWebSocketServer(config *config.Config, rpcClient *rpc.Client) *Server {
 		},
 	}
 
-	apiAddr := config.Get("api_addr").String()
 	wsPort := config.Get("websocket_port").MustString(":8900")
 	rpcAddr := config.Get("rpc_addr").MustString("127.0.0.1:8901")
 
 	return &Server{
 		config: config,
-		apiAddr: apiAddr,
 		wsPort: wsPort,
 		rpcAddr: rpcAddr,
 		rpcClient: rpcClient,
@@ -61,28 +58,22 @@ func (s *Server) GetRpcAddr() string {
 	return s.rpcAddr
 }
 
-func (s *Server) GetCometAddr() string {
-	websocketProtocol := s.config.Get("websocket_protocol").MustString("ws")
-	websocketHost := s.config.Get("websocket_host").MustString("127.0.0.1")
-	return fmt.Sprintf("%s://%s%s", websocketProtocol, websocketHost, s.wsPort)
-}
-
 // 启动 websocket server
 func (s *Server) initWsServer() {
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/ws", s.serveWs)
 
 	log.Println("[info] websocket server start running: " + s.wsPort)
-	websocketProtocol := s.config.Get("websocket_protocol").MustString("ws")
-	if websocketProtocol == "ws" {
-		if err := http.ListenAndServe(s.wsPort, serverMux); err != nil {
+	websocketProtocol := s.config.Get("socket_protocol").MustString("ws")
+	if websocketProtocol == "wss" {
+		wssCertPem := s.config.Get("wss_cert_pem").String()
+		wssKeyPem := s.config.Get("wss_key_pem").MustString("ws")
+		if err := http.ListenAndServeTLS(s.wsPort, wssCertPem, wssKeyPem, serverMux); err != nil {
 			log.Fatal("服务启动失败:" + err.Error())
 			panic(err)
 		}
 	} else {
-		wssCertPem := s.config.Get("wss_cert_pem").String()
-		wssKeyPem := s.config.Get("wss_key_pem").MustString("ws")
-		if err := http.ListenAndServeTLS(s.wsPort, wssCertPem, wssKeyPem, serverMux); err != nil {
+		if err := http.ListenAndServe(s.wsPort, serverMux); err != nil {
 			log.Fatal("服务启动失败:" + err.Error())
 			panic(err)
 		}
@@ -95,6 +86,11 @@ func (s *Server) handleClients() {
 		select {
 		case client := <-s.register:
 			log.Println("[info] 注册客户端, connId: " + client.connId)
+			//关闭同名connId客户端连接
+			if c, ok := s.clients[client.connId]; ok {
+				s.unregister <- c
+			}
+
 			s.clients[client.connId] = client
 
 			//上报给 router api 服务
@@ -169,7 +165,7 @@ func (s Server) checkToken(query map[string][]string) (*TokenInfo, error) {
 		return nil, errors.New("消息体异常, 不能解析")
 	}
 
-	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", tokenInfo.ConnId, tokenInfo.Token, tokenInfo.Info, s.GetCometAddr()); err != nil {
+	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", tokenInfo.ConnId, tokenInfo.Token, tokenInfo.Info); err != nil {
 		color.Red(err.Error())
 		return nil, errors.New("授权失败" + err.Error())
 	}
