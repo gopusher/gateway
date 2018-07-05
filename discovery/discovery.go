@@ -44,26 +44,23 @@ func (discovery *Discovery) KeepAlive(node string, nodeInfo string) {
 	lease := clientv3.NewLease(client)
 	var curLeaseId clientv3.LeaseID = 0
 
-	for {
-		if curLeaseId == 0 {
-			leaseResp, err := lease.Grant(context.TODO(), int64(ttl + 2))
-			if err != nil {
-				goto SLEEP
-			}
+	leaseResp, err := lease.Grant(context.TODO(), int64(ttl + 1))
+	if err != nil {
+		panic(err)
+	}
 
-			if _, err := kv.Put(context.TODO(), key, nodeInfo, clientv3.WithLease(leaseResp.ID)); err != nil {
-				goto SLEEP
-			}
-			curLeaseId = leaseResp.ID
-		} else {
-			//log.Printf("keepalive curLeaseId=%d\n", curLeaseId)
-			if _, err := lease.KeepAliveOnce(context.TODO(), curLeaseId); err == rpctypes.ErrLeaseNotFound {
-				curLeaseId = 0
-				continue
-			}
-		}
-	SLEEP:
+	if _, err := kv.Put(context.TODO(), key, nodeInfo, clientv3.WithLease(leaseResp.ID)); err != nil {
+		panic(err)
+	}
+
+	curLeaseId = leaseResp.ID
+
+	for {
 		time.Sleep(time.Duration(ttl) * time.Second)
+
+		if _, err := lease.KeepAliveOnce(context.TODO(), curLeaseId); err == rpctypes.ErrLeaseNotFound {
+			panic(err)
+		}
 	}
 }
 

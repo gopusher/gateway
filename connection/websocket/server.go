@@ -109,7 +109,6 @@ func (s *Server) handleClients() {
 	}
 }
 
-
 func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
 	//检查是否是有效连接
 	tokenInfo, err := s.checkToken(r.URL.Query())
