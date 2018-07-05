@@ -6,23 +6,24 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"gopusher/comet/config"
 	"bytes"
 	"io/ioutil"
 	"github.com/fatih/color"
 )
 
 type Client struct {
-	config *config.Config
+	rpcApiUrl string
+	rpcUserAgent string
 }
 
-func NewClient(config *config.Config) *Client {
+func NewClient(rpcApiUrl string, rpcUserAgent string) *Client {
 	return &Client{
-		config: config,
+		rpcApiUrl: rpcApiUrl,
+		rpcUserAgent: rpcUserAgent,
 	}
 }
 
-func (c Client) Send(class string, method string, args ...interface{}) (string, error) {
+func (c Client) send(class string, method string, args ...interface{}) (string, error) {
 	type RpcBody struct {
 		ClassName	string	`json:"class"`
 		MethodName 	string	`json:"method"`
@@ -34,13 +35,12 @@ func (c Client) Send(class string, method string, args ...interface{}) (string, 
 		Args: args,
 	})
 
-	apiUrl := c.config.Get("rpc_api_url").String()
-	req, err := http.NewRequest("POST", apiUrl, bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", c.rpcApiUrl, bytes.NewBuffer(body))
 	if err != nil {
 		color.Red("rpc 请求失败1 :" + err.Error())
 		return "", errors.New("请求失败:" + err.Error())
 	}
-	req.Header.Set("User-Agent", c.config.Get("rpc_user_agent").String())
+	req.Header.Set("User-Agent", c.rpcUserAgent)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 
@@ -72,15 +72,15 @@ func (c Client) Send(class string, method string, args ...interface{}) (string, 
 }
 
 func (c Client) SuccessRpc(class string, method string, args ...interface{}) (string, error) {
-	ret, err := c.Send(class, method, args...)
+	ret, err := c.send(class, method, args...)
 	if err != nil {
 		return "", err
 	}
 
 	type RetInfo struct {
-		Code int `code`
-		Data interface{} `data`
-		Error string `error`
+		Code int `json"code"`
+		Data interface{} `json"data"`
+		Error string `json"error"`
 	}
 
 	var retInfo RetInfo

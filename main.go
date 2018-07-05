@@ -32,7 +32,7 @@ func main() {
 	cometServiceName := config.Get("comet_service_name").MustString("comet")
 	etcdAddr := []string{config.Get("etcd_addr").String()}
 
-	rpcClient := rpc.NewClient(config)
+	rpcClient := rpc.NewClient(config.Get("rpc_api_url").String(), config.Get("rpc_user_agent").String())
 
 	discoveryService := discovery.NewDiscovery(etcdAddr, cometServiceName)
 	if *isMonitor {
