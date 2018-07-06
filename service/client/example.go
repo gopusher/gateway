@@ -36,17 +36,17 @@ func main() {
 	//注意第三个参数是指针类型
 
 	//发送消息
-	//err2 := rpc.Call("Server.SendToConnections", &Message{
-	//	Connections: os.Args[2:],
-	//	Msg: os.Args[1],
-	//	Token: "token",
-	//}, &response)
-
-	//kick conns
-	err2 := rpc.Call("Server.KickConnections", &KickMessage{
-		Connections: os.Args[1:],
+	err2 := rpc.Call("Server.SendToConnections", &Message{
+		Connections: os.Args[2:],
+		Msg: os.Args[1],
 		Token: "token",
 	}, &response)
+
+	//kick conns
+	//err2 := rpc.Call("Server.KickConnections", &KickMessage{
+	//	Connections: os.Args[1:],
+	//	Token: "token",
+	//}, &response)
 
 	if err2 != nil {
 		log.Fatal(err2)

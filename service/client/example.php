@@ -40,7 +40,7 @@ class JsonRPC
         return json_decode($line,true);
     }
 
-    public function SendToConnections($host, $port, $token, $to, $msg)
+    public function SendToConnections($host, $port, $token, array $connections, $msg)
     {
         $data = array(
             'method' => "Server.SendToConnections",
