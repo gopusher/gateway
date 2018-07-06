@@ -35,7 +35,7 @@ func (discovery *Discovery) getClient() *clientv3.Client {
 	return client
 }
 
-func (discovery *Discovery) KeepAlive(node string, nodeInfo string) {
+func (discovery *Discovery) KeepAlive(node string) {
 	key := fmt.Sprintf("%s/%s", discovery.serviceName, node)
 	ttl := 1
 	client := discovery.getClient()
@@ -49,7 +49,7 @@ func (discovery *Discovery) KeepAlive(node string, nodeInfo string) {
 		panic(err)
 	}
 
-	if _, err := kv.Put(context.TODO(), key, nodeInfo, clientv3.WithLease(leaseResp.ID)); err != nil {
+	if _, err := kv.Put(context.TODO(), key, fmt.Sprintf("%d", leaseResp.GetRevision() + 1), clientv3.WithLease(leaseResp.ID)); err != nil {
 		panic(err)
 	}
 
@@ -64,7 +64,7 @@ func (discovery *Discovery) KeepAlive(node string, nodeInfo string) {
 	}
 }
 
-func (discovery *Discovery) Watch(addClient func(string, string), removeClient func(string)) {
+func (discovery *Discovery) Watch(addClient func(string, string), removeClient func(string, string)) {
 	client := discovery.getClient()
 
 	defer client.Close()
@@ -95,13 +95,14 @@ func (discovery *Discovery) Watch(addClient func(string, string), removeClient f
 	watchChan := watcher.Watch(context.TODO(), discovery.serviceName, clientv3.WithPrefix(), clientv3.WithRev(curRevision))
 	for watchResp := range watchChan { // if ctx is Done, for loop will break
 		for _, event := range watchResp.Events {
+			//fmt.Printf("watch 事件: %d, %d \n", watchResp.Header.GetRevision(), event.Kv.Version)
 			switch event.Type {
 			case mvccpb.PUT:
 				//fmt.Println("PUT事件: " + string(event.Kv.Key) + ">>" + string(event.Kv.Value))
 				addClient(string(event.Kv.Key), string(event.Kv.Value))
 			case mvccpb.DELETE:
 				//fmt.Println("DELETE事件: " + string(event.Kv.Key) + ">>" + string(event.Kv.Value))
-				removeClient(string(event.Kv.Key))
+				removeClient(string(event.Kv.Key), fmt.Sprintf("%d", watchResp.Header.GetRevision()))
 			}
 		}
 	}

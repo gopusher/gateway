@@ -73,8 +73,7 @@ $client = new JsonRPC();
 // $to = array_pad([], 8500, '5ab35b7a06103');
 // $r = $client->sendToConnections("192.168.3.165:8901", 'token', 8901, $to, $argv[1]);
 // var_export($r);
-$num = 8500;
-$num = 100000;
+$num = 500;
 for ($i = 0; $i < $num; $i++) {
     $r = $client->sendToConnections("192.168.3.165", 8901, 'token', array_slice($argv, 2), $argv[1]);
 }

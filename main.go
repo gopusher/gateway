@@ -47,7 +47,7 @@ func main() {
 	go service.InitRpcServer(server, config.Get("comet_rpc_token").MustString("token"))
 
 	//join cluster
-	joinCluster(config, discoveryService, server.GetRpcAddr())
+	joinCluster(discoveryService, server.GetRpcAddr())
 }
 
 func getCometServer(config *c.Config, rpcClient *rpc.Client) contracts.Server {
@@ -64,28 +64,28 @@ func getCometServer(config *c.Config, rpcClient *rpc.Client) contracts.Server {
 	}
 }
 
-func joinCluster(config *c.Config, discoveryService *discovery.Discovery, rpcAddr string) {
-	log.Println(fmt.Sprintf("rpcAddr: %s, etcdValue: %s, 加入集群成功", rpcAddr, rpcAddr))
+func joinCluster(discoveryService *discovery.Discovery, rpcAddr string) {
+	log.Println(fmt.Sprintf("rpcAddr: %s, 加入集群成功", rpcAddr))
 
-	discoveryService.KeepAlive(rpcAddr, rpcAddr)
+	discoveryService.KeepAlive(rpcAddr)
 }
 
 func addComet(rpcClient *rpc.Client) func(string, string) {
-	return func(node string, nodeInfo string) {
-		fmt.Println("增加节点: " + node)
+	return func(node string, revision string) {
+		fmt.Printf("增加节点: node: %s, revision: %s \n", node, revision)
 
-		if _, err := rpcClient.SuccessRpc("Im", "addCometServer", node, nodeInfo); err != nil {
-			color.Red("增加节点失败>> " + err.Error())
+		if _, err := rpcClient.SuccessRpc("Im", "addCometServer", node, revision); err != nil {
+			color.Red("增加节点失败: " + err.Error())
 		}
 	}
 }
 
-func delComet(rpcClient *rpc.Client) func(string) {
-	return func(node string) {
-		fmt.Println("移除节点: " + node)
+func delComet(rpcClient *rpc.Client) func(string, string) {
+	return func(node string, revision string) {
+		fmt.Printf("移除节点: node: %s, revision: %s \n", node, revision)
 
-		if _, err := rpcClient.SuccessRpc("Im", "removeCometServer", node); err != nil {
-			color.Red("移除节点>> " + err.Error())
+		if _, err := rpcClient.SuccessRpc("Im", "removeCometServer", node, revision); err != nil {
+			color.Red("移除节点失败: " + err.Error())
 		}
 	}
 }
