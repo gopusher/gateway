@@ -167,7 +167,7 @@ func (s Server) checkToken(query map[string][]string) (*TokenInfo, error) {
 		return nil, errors.New("消息体异常, 不能解析")
 	}
 
-	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", tokenInfo.ConnId, tokenInfo.Token, tokenInfo.Info); err != nil {
+	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", tokenInfo.ConnId, tokenInfo.Token, tokenInfo.Info, s.rpcAddr); err != nil {
 		color.Red(err.Error())
 		return nil, errors.New("授权失败" + err.Error())
 	}
