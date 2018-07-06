@@ -4,26 +4,19 @@ import (
 	"net/rpc/jsonrpc"
 	"log"
 	"fmt"
-	"encoding/json"
 	"os"
 )
 
 type Message struct {
-	To   	[]string	`json:"to"`	//消息接受者
-	Msg 	string		`json:"msg"` //为一个json，里边包含 type 消息类型
-	Token	string		`json:"token"` //作为消息发送鉴权
+	Connections		[]string	`json"connections"`	//消息接受者
+	Msg 			string		`json"msg"` 		//为一个json，里边包含 type 消息类型
+	Token			string		`json"token"` 		//作为消息发送鉴权
 }
 
 func main() {
-	if len(os.Args) < 3 {
+	if len(os.Args) < 2 {
 		log.Fatal("消息发送参数格式: go run ./example.go msg ...to")
 	}
-
-	message, _ := json.Marshal(&Message{
-		To: os.Args[2:],
-		Msg: os.Args[1],
-		Token: "token",
-	})
 
 	//连接远程rpc服务
 	//这里使用jsonrpc.Dial
@@ -37,7 +30,15 @@ func main() {
 	//调用远程方法
 	//注意第三个参数是指针类型
 
-	err2 := rpc.Call("Server.SendToConnections", string(message), &response)
+	//发送消息
+	//err2 := rpc.Call("Server.SendToConnections", &Message{
+	//	Connections: os.Args[2:],
+	//	Msg: os.Args[1],
+	//	Token: "token",
+	//}, &response)
+
+	//kick conn
+	err2 := rpc.Call("Server.KickConnections", os.Args[1:], &response)
 
 	if err2 != nil {
 		log.Fatal(err2)

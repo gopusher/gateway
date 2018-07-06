@@ -175,11 +175,11 @@ func (s Server) checkToken(query map[string][]string) (*TokenInfo, error) {
 	return &tokenInfo, nil
 }
 
-func (s *Server) SendToConnections(to []string, msg string) ([]string, error) {
+func (s *Server) SendToConnections(connections []string, msg string) ([]string, error) {
 	var errIds []string
-	for _, id := range to {
-		if err := s.SendToConnection(id, msg); err != nil {
-			errIds = append(errIds, id)
+	for _, connId := range connections {
+		if err := s.SendToConnection(connId, msg); err != nil {
+			errIds = append(errIds, connId)
 		}
 	}
 	if len(errIds) > 0 {
@@ -189,21 +189,31 @@ func (s *Server) SendToConnections(to []string, msg string) ([]string, error) {
 	return []string{}, nil
 }
 
-func (s *Server) SendToConnection(to string, msg string) error {
-	if client, ok := s.clients[to]; ok {
+func (s *Server) SendToConnection(connId string, msg string) error {
+	if client, ok := s.clients[connId]; ok {
 		select {
 		case client.send <- []byte(msg):
 			// log.Println("[info] SendToConnection " + to + ": " + msg)
 			return nil
 		default:
-			delete(s.clients, to)
+			delete(s.clients, connId)
 			close(client.send) //是否需要 关闭 chan 的时候，发送完毕所有的chan再关闭连接 ??
 			//client.Close()
-			color.Red("发送消息失败, to: %s", to)
-			return errors.New(fmt.Sprintf("发送消息失败, to %s", to))
+			color.Red("发送消息失败, to: %s", connId)
+			return errors.New(fmt.Sprintf("发送消息失败, to %s", connId))
 		}
 	}
 
-	color.Red("发送消息失败, 客户端不在维护中, to: %s", to)
-	return errors.New(fmt.Sprintf("发送消息失败, 客户端不在维护中, to %s", to))
+	color.Red("发送消息失败, 客户端不在维护中, to: %s", connId)
+	return errors.New(fmt.Sprintf("发送消息失败, 客户端不在维护中, to %s", connId))
+}
+
+func (s *Server) KickConnections(connections []string) error {
+	for _, connId := range connections {
+		if client, ok := s.clients[connId]; ok {
+			s.unregister <- client
+		}
+	}
+
+	return nil
 }

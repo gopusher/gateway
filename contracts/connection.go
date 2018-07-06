@@ -2,6 +2,7 @@ package contracts
 
 type Server interface {
 	Run()
-	SendToConnections(to []string, msg string) ([]string, error)
+	SendToConnections(connections []string, msg string) ([]string, error)
 	GetRpcAddr() string
+	KickConnections(connections []string) error
 }

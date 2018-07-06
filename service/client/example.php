@@ -44,11 +44,23 @@ class JsonRPC
     {
         $data = array(
             'method' => "Server.SendToConnections",
-            'params' => [json_encode([
-                'to'    => (array) $to,
+            'params' => [[
+                'connections'    => array_values((array) $to),
                 'msg'   => $msg,
                 'token' => $token
-            ])],
+            ]],
+        );
+
+        return $this->execute($host, $port, $data);
+    }
+
+    public function KickConnections($host, $port, $token, array $connections)
+    {
+        $data = array(
+            'method' => "Server.KickConnections",
+            'params' => [
+                array_values(array_unique($connections)),
+            ],
         );
 
         return $this->execute($host, $port, $data);
@@ -62,20 +74,24 @@ class JsonRPC
     }
 }
 
+/** kick conn **/
+// if (count($argv) < 2) {
+//     throw new Exception('消息参数格式: php ./example.php ...connections');
+// }
+//
+// $client = new JsonRPC();
+// $r = $client->KickConnections("192.168.3.165", 8901, 'token', array_slice($argv, 1));
+// var_export($r);
+// exit;
+/** kick conn end **/
+
+
+/** 发消息 **/
 if (count($argv) < 3) {
     throw new Exception('消息发送参数格式: php ./example.php msg ...to');
 }
-
-$s = microtime(true);
-//todo 这里的 ip 要注意
 $client = new JsonRPC();
-//'{ "from": "5ab22da3d237a", "to": "1", "type": "group", "contentType": "text", "content": "123" }'
-// $to = array_pad([], 8500, '5ab35b7a06103');
-// $r = $client->sendToConnections("192.168.3.165:8901", 'token', 8901, $to, $argv[1]);
-// var_export($r);
-$num = 500;
-for ($i = 0; $i < $num; $i++) {
-    $r = $client->sendToConnections("192.168.3.165", 8901, 'token', array_slice($argv, 2), $argv[1]);
-}
-$e = microtime(true);
-echo $e - $s;
+$r = $client->SendToConnections("192.168.3.165", 8901, 'token', array_slice($argv, 2), $argv[1]);
+var_export($r);
+exit;
+/** 发消息 end **/
