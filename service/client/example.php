@@ -45,9 +45,9 @@ class JsonRPC
         $data = array(
             'method' => "Server.SendToConnections",
             'params' => [[
-                'connections'    => array_values((array) $to),
-                'msg'   => $msg,
-                'token' => $token
+                'connections'   => array_values(array_unique($connections)),
+                'msg'           => $msg,
+                'token'         => $token
             ]],
         );
 
@@ -58,9 +58,10 @@ class JsonRPC
     {
         $data = array(
             'method' => "Server.KickConnections",
-            'params' => [
-                array_values(array_unique($connections)),
-            ],
+            'params' => [[
+                'connections'   => array_values(array_unique($connections)),
+                'token'         => $token
+            ]],
         );
 
         return $this->execute($host, $port, $data);

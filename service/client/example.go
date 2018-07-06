@@ -13,6 +13,11 @@ type Message struct {
 	Token			string		`json"token"` 		//作为消息发送鉴权
 }
 
+type KickMessage struct {
+	Connections		[]string	`json"connections"`	//消息接受者
+	Token			string		`json"token"` 		//作为消息发送鉴权
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal("消息发送参数格式: go run ./example.go msg ...to")
@@ -37,8 +42,11 @@ func main() {
 	//	Token: "token",
 	//}, &response)
 
-	//kick conn
-	err2 := rpc.Call("Server.KickConnections", os.Args[1:], &response)
+	//kick conns
+	err2 := rpc.Call("Server.KickConnections", &KickMessage{
+		Connections: os.Args[1:],
+		Token: "token",
+	}, &response)
 
 	if err2 != nil {
 		log.Fatal(err2)

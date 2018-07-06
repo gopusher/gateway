@@ -63,6 +63,14 @@ func (s *Server) SendToConnections(message *Message, reply *string) error {
 		return errors.New(string(response))
 	}
 
+	if message.Msg == "" {
+		response, _ := json.Marshal(&Response{
+			ErrIds: []string{},
+			ErrInfo: "empty msg.",
+		})
+		return errors.New(string(response))
+	}
+
 	if errIds, err := s.server.SendToConnections(message.Connections, message.Msg); err != nil {
 		response, _ := json.Marshal(&Response{
 			ErrIds: errIds,
@@ -75,8 +83,26 @@ func (s *Server) SendToConnections(message *Message, reply *string) error {
 	return nil
 }
 
-func (s *Server) KickConnections(connections []string, reply *string) error {
-	go s.server.KickConnections(connections)
+type KickMessage struct {
+	Connections		[]string	`json"connections"`	//消息接受者
+	Token			string		`json"token"` 		//作为消息发送鉴权
+}
+
+func (s *Server) KickConnections(kickMessage *KickMessage, reply *string) error {
+	type Response struct {
+		ErrIds	[]string	`json:"ids"`
+		ErrInfo	string		`json:"msg"`
+	}
+
+	if kickMessage.Token != s.token {
+		response, _ := json.Marshal(&Response{
+			ErrIds: []string{},
+			ErrInfo: "token error.",
+		})
+		return errors.New(string(response))
+	}
+
+	go s.server.KickConnections(kickMessage.Connections)
 
 	*reply = "ok"
 	return nil
