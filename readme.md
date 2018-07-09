@@ -37,17 +37,15 @@ Gopusher Comet 是一个支持分布式部署的通用长连接接入层服务�
 
 ### 下载 Download
 
-```
-wget /go$VERSION.$OS-$ARCH.tar.gz
-```
+下载项目源码。download comet souce code.
 
 ### 依赖 Dependencies
 
 ```
-1. go get github.com/coreos/etcd/clientv3
-2. go get github.com/gorilla/websocket
-3. go get github.com/fatih/color
-4. go get gopkg.in/ini.v1
+go get github.com/coreos/etcd/clientv3
+go get github.com/gorilla/websocket
+go get github.com/fatih/color
+go get gopkg.in/ini.v1
 ```
 
 ### 编译 Build
