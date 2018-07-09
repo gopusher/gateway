@@ -6,9 +6,9 @@ Gopusher Comet 是一个支持分布式部署的通用长连接接入层服务�
 
 > demo: [https://chat.yadou.net](https://chat.yadou.net)
 >
-> 这个demo是一个聊天应用，采用comet作为长连接接入层，采用php([源码](https://github.com/Gopusher/message))开发聊天的路由和逻辑层部分。
+> 这是一个用php开发的聊天应用([源码](https://github.com/Gopusher/message))，采用comet作为长连接接入层，采用php开发聊天的路由和逻辑层部分。
 >
-> The demo is a chat app which use comet service, and using php language ([code souce](https://github.com/Gopusher/message)) develop the chat routing and  logical layer.
+> This is a chat application developed in php ([code souce](https://github.com/Gopusher/message)), using comet service to handle all client persistent connections, and using php language develop the chat routing and  logical layer.
 
 ## 开发指南 Develop Guide
 
