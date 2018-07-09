@@ -5,6 +5,10 @@ Gopusher Comet 是一个支持分布式部署的通用长连接接入层服务�
 你可以很容易的使用 **http api** 来构建实时聊天，通知推送应用。You can use **http api** to develop a instant messaging application or a push notification application easily.
 
 > demo: [https://chat.yadou.net](https://chat.yadou.net)
+>
+> 这个demo是一个聊天应用，采用comet作为长连接接入层，采用php([源码](https://github.com/Gopusher/message))开发聊天的路由和逻辑层部分。
+>
+> The demo is a chat app which use comet service, and using php language ([code souce](https://github.com/Gopusher/message)) develop the chat routing and  logical layer.
 
 ## 开发指南 Develop Guide
 
@@ -24,3 +28,106 @@ Gopusher Comet 是一个支持分布式部署的通用长连接接入层服务�
 * multi-protocol support, websocket is already supported, tcp is coming soon
 * cluster support
 * developer friendly, rpc call using http api to make develop with any program languages easily
+
+## 安装 Installation
+
+### Installing Go
+
+[https://golang.org/doc/install](https://golang.org/doc/install)
+
+### 下载 Download
+
+```
+wget /go$VERSION.$OS-$ARCH.tar.gz
+```
+
+### 依赖 Dependencies
+
+```
+1. go get github.com/coreos/etcd/clientv3
+2. go get github.com/gorilla/websocket
+3. go get github.com/fatih/color
+4. go get gopkg.in/ini.v1
+```
+
+### 编译 Build
+
+```
+go build -o chat-comet main.go
+```
+
+## 运行 Run
+
+### 运行etcd Run etcd
+
+[run with docker](https://github.com/Gopusher/awesome/blob/master/docker/docker-compose.yml)
+
+当然你可以选择你喜欢的方式运行etcd.  Of course you can run etcd as the way you like.
+
+### 配置 Configuration
+
+> Edit `comet.ini`
+
+```
+# 最大的cpu执行数
+max_proc=1
+# etcd 中 comet service name
+comet_service_name=comet
+# etcd server addr
+etcd_addr=127.0.0.1:2379
+# api addr
+rpc_api_url=http://www.chat.com/im/index/rpc
+rpc_user_agent="CtxImRpc 1.0"
+
+# 通信协议 协议，可选项 tcp(tcp需要后续开发), ws, wss (如果为 wss 需要设置 wss_cert_pem 和 wss_key_pem)
+socket_protocol=ws
+# websockeet 监听端口
+websocket_port=:8900
+# wss_cert_pem=
+# wss_key_pem=
+# rpc 监听端口
+rpc_addr=192.168.3.165:8901
+comet_rpc_token=token
+```
+
+### 运行 Run
+运行分两种模式，comet 运行 和 comet monitor 运行：
+
+1. run comet monitor
+
+```
+./chat-comet -c comet.ini -m
+```
+
+2. run comet
+
+```
+./chat-comet -c comet.ini
+```
+到现在为止，你已经可以使用comet了，并采用你喜欢的语言进行接入开发你的长连接应用了。So far, you can already use comet service and develop your persistent connections application with your favorite program language.
+
+### 集群配置 Cluster configuration 
+
+如果你需要采用集群的方式运行，你可以采用nginx等来做负载均衡。If you need to run comet cluster, you can use nginx, etc. for load balancing.
+
+```
+upstream websocket {
+    server 192.168.3.165:8900 weight=1;
+    server 192.168.3.165:8902 weight=1;
+}
+
+server {
+    listen 8910;
+
+    server_name www.chat.com$;
+
+    location / {
+        proxy_pass http://websocket;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+你也可以采用服务器下发comet ip port的方式来进行负载均衡，you can also use the method of sending the comet ip port to load balance.
