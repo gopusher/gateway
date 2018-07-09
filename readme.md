@@ -56,6 +56,11 @@ wget /go$VERSION.$OS-$ARCH.tar.gz
 go build -o chat-comet main.go
 ```
 
+mac上编译debian版本, build debian bin on mac
+```
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
+```
+
 ## 运行 Run
 
 ### 运行etcd Run etcd
@@ -91,15 +96,13 @@ comet_rpc_token=token
 ```
 
 ### 运行 Run
-运行分两种模式，comet 运行 和 comet monitor 运行：
-
-1. run comet monitor
+1. Run comet monitor
 
 ```
 ./chat-comet -c comet.ini -m
 ```
 
-2. run comet
+2. Run comet
 
 ```
 ./chat-comet -c comet.ini
