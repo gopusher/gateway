@@ -8,6 +8,7 @@ import (
 	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	"fmt"
 	"github.com/coreos/etcd/mvcc/mvccpb"
+	"log"
 )
 
 type Discovery struct {
@@ -44,14 +45,19 @@ func (discovery *Discovery) KeepAlive(node string) {
 	lease := clientv3.NewLease(client)
 	var curLeaseId clientv3.LeaseID = 0
 
-	leaseResp, err := lease.Grant(context.TODO(), int64(ttl + 1))
+	ctx, _ := context.WithTimeout(context.Background(), time.Second)
+	leaseResp, err := lease.Grant(ctx, int64(ttl + 1))
+
 	if err != nil {
+		panic("连接 etcd 失败")
+	}
+
+	revision := fmt.Sprintf("%d", leaseResp.GetRevision() + 1)
+	if _, err := kv.Put(context.TODO(), key, revision, clientv3.WithLease(leaseResp.ID)); err != nil {
 		panic(err)
 	}
 
-	if _, err := kv.Put(context.TODO(), key, fmt.Sprintf("%d", leaseResp.GetRevision() + 1), clientv3.WithLease(leaseResp.ID)); err != nil {
-		panic(err)
-	}
+	fmt.Printf("node: %s, revision: %s, 加入集群成功\n", node, revision)
 
 	curLeaseId = leaseResp.ID
 
@@ -73,20 +79,22 @@ func (discovery *Discovery) Watch(addClient func(string, string), removeClient f
 
 	// 先读当前所有孩子, 直到成功为止
 	kv := clientv3.NewKV(client)
-	for {
-		rangeResp, err := kv.Get(context.TODO(), discovery.serviceName, clientv3.WithPrefix())
-		if err != nil {
-			continue
-		}
 
-		for _, kv := range rangeResp.Kvs {
-			addClient(string(kv.Key), string(kv.Value))
-		}
+	ctx, _ := context.WithTimeout(context.Background(), time.Second)
+	rangeResp, err := kv.Get(ctx, discovery.serviceName, clientv3.WithPrefix())
 
-		// 从当前版本开始订阅
-		curRevision = rangeResp.Header.Revision + 1
-		break
+	if err != nil {
+		panic("连接 etcd 失败")
 	}
+
+	log.Println("[info] Comet Monitor is running")
+
+	for _, kv := range rangeResp.Kvs {
+		addClient(string(kv.Key), string(kv.Value))
+	}
+
+	// 从当前版本开始订阅
+	curRevision = rangeResp.Header.Revision + 1
 
 	// 监听后续的PUT与DELETE事件
 	watcher := clientv3.NewWatcher(client)

@@ -7,6 +7,7 @@ import (
 	"net/rpc/jsonrpc"
 	"encoding/json"
 	"errors"
+	"log"
 )
 
 type Server struct {
@@ -23,6 +24,8 @@ func InitRpcServer(server contracts.Server, token string) {
 	if err != nil {
 		panic("rpc服务初始化失败, " + err.Error())
 	}
+
+	log.Println("[info] comet rpc server start running: " + server.GetRpcAddr())
 
 	for {
 		conn, err := listener.Accept()

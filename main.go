@@ -7,7 +7,6 @@ import (
 	"gopusher/comet/contracts"
 	"gopusher/comet/connection/websocket"
 	"gopusher/comet/service"
-	"log"
 	"fmt"
 	"gopusher/comet/discovery"
 	"gopusher/comet/rpc"
@@ -65,8 +64,6 @@ func getCometServer(config *c.Config, rpcClient *rpc.Client) contracts.Server {
 }
 
 func joinCluster(discoveryService *discovery.Discovery, rpcAddr string) {
-	log.Println(fmt.Sprintf("rpcAddr: %s, 加入集群成功", rpcAddr))
-
 	discoveryService.KeepAlive(rpcAddr)
 }
 

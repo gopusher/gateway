@@ -81,7 +81,6 @@ func (s *Server) initWsServer() {
 }
 
 func (s *Server) handleClients() {
-	log.Println("[info] handle clients")
 	for {
 		select {
 		case client := <-s.register:
