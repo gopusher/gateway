@@ -17,6 +17,7 @@ type Server struct {
 	config *config.Config
 	wsPort string
 	rpcAddr string
+	rpcPort string
 	rpcClient *rpc.Client
 	upgrader websocket.Upgrader
 	register chan *Client
@@ -33,12 +34,14 @@ func NewWebSocketServer(config *config.Config, rpcClient *rpc.Client) *Server {
 		},
 	}
 
-	wsPort := config.Get("websocket_port").MustString(":8900")
-	rpcAddr := config.Get("rpc_addr").MustString("127.0.0.1:8901")
+	wsPort := ":" + config.Get("websocket_port").MustString("8900")
+	rpcPort := ":" + config.Get("comet_rpc_port").MustString("8901")
+	rpcAddr := config.Get("comet_rpc_addr").MustString("127.0.0.1")
 
 	return &Server{
 		config: config,
 		wsPort: wsPort,
+		rpcPort: rpcPort,
 		rpcAddr: rpcAddr,
 		rpcClient: rpcClient,
 		upgrader: upgrader,
@@ -55,7 +58,11 @@ func (s *Server) Run() {
 }
 
 func (s *Server) GetRpcAddr() string {
-	return s.rpcAddr
+	return s.rpcAddr + s.rpcPort
+}
+
+func (s *Server) GetRpcPort() string {
+	return s.rpcPort
 }
 
 // 启动 websocket server
@@ -63,7 +70,7 @@ func (s *Server) initWsServer() {
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/ws", s.serveWs)
 
-	log.Println("[info] websocket server start running: " + s.wsPort)
+	log.Println("[info] websocket server start running " + s.wsPort)
 	websocketProtocol := s.config.Get("socket_protocol").MustString("ws")
 	if websocketProtocol == "wss" {
 		wssCertPem := s.config.Get("wss_cert_pem").String()
@@ -89,13 +96,13 @@ func (s *Server) handleClients() {
 			s.clients[client.connId] = client
 
 			//上报给 router api 服务
-			if _, err := s.rpcClient.SuccessRpc("Im", "online", client.connId, client.info, s.rpcAddr); err != nil {
+			if _, err := s.rpcClient.SuccessRpc("Im", "online", client.connId, client.info, s.GetRpcAddr()); err != nil {
 				color.Red(err.Error())
 			}
 		case client := <-s.unregister:
 			log.Println("[info] 断开连接，connId:" + client.connId)
 			//上报给 router api 服务
-			if _, err := s.rpcClient.SuccessRpc("Im", "offline", client.connId, client.info, s.rpcAddr); err != nil {
+			if _, err := s.rpcClient.SuccessRpc("Im", "offline", client.connId, client.info, s.GetRpcAddr()); err != nil {
 				color.Red(err.Error())
 			}
 
@@ -166,7 +173,7 @@ func (s Server) checkToken(query map[string][]string) (*TokenInfo, error) {
 		return nil, errors.New("消息体异常, 不能解析")
 	}
 
-	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", tokenInfo.ConnId, tokenInfo.Token, tokenInfo.Info, s.rpcAddr); err != nil {
+	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", tokenInfo.ConnId, tokenInfo.Token, tokenInfo.Info, s.GetRpcAddr()); err != nil {
 		color.Red(err.Error())
 		return nil, errors.New("授权失败" + err.Error())
 	}

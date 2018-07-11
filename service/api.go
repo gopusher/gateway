@@ -20,12 +20,12 @@ func InitRpcServer(server contracts.Server, token string) {
 		server: server,
 		token: token,
 	})
-	listener, err := net.Listen("tcp", server.GetRpcAddr())
+	listener, err := net.Listen("tcp", server.GetRpcPort())
 	if err != nil {
 		panic("rpc服务初始化失败, " + err.Error())
 	}
 
-	log.Println("[info] comet rpc server start running: " + server.GetRpcAddr())
+	log.Println("[info] comet rpc server start running " + server.GetRpcPort())
 
 	for {
 		conn, err := listener.Accept()
