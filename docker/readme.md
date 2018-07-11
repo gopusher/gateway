@@ -36,8 +36,9 @@ comet_rpc_token=token
 ## 运行 Run
 
 1. 运行etcd Run Etcd
-	[run with docker](https://github.com/Gopusher/awesome/blob/master/docker/docker-compose.yml)
-	当然你可以选择你喜欢的方式运行etcd. Of course you can run etcd as the way you like.
+
+[run with docker](https://github.com/Gopusher/awesome/blob/master/docker/docker-compose.yml)
+当然你可以选择你喜欢的方式运行etcd. Of course you can run etcd as the way you like.
 
 1. Run comet monitor
 
