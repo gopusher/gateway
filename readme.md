@@ -51,7 +51,7 @@ go get gopkg.in/ini.v1
 ### 编译 Build
 
 ```
-go build -o chat-comet main.go
+go build -o comet main.go
 ```
 
 mac上编译debian版本, build debian bin on mac
@@ -98,13 +98,13 @@ comet_rpc_token=token
 1. Run comet monitor
 
 ```
-./chat-comet -c comet.ini -m
+./comet -c comet.ini -m
 ```
 
 2. Run comet
 
 ```
-./chat-comet -c comet.ini
+./comet -c comet.ini
 ```
 到现在为止，你已经可以使用comet了，并采用你喜欢的语言进行接入开发你的长连接应用了。So far, you can already use comet service and develop your persistent connections application with your favorite program language.
 
