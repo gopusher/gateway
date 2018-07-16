@@ -8,8 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fatih/color"
-	"encoding/json"
-	"reflect"
 	"gopusher/comet/rpc"
 )
 
@@ -117,14 +115,14 @@ func (s *Server) handleClients() {
 
 func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
 	//检查是否是有效连接
-	tokenInfo, err := s.checkToken(r.URL.Query())
+	connId, clientInfo, err := s.checkToken(r.URL.Query())
 	if err != nil {
 		s.responseWsUnauthorized(w)
 		return
 	}
 
 	//存在相同connId客户端连接
-	if _, ok := s.clients[tokenInfo.ConnId]; ok {
+	if _, ok := s.clients[connId]; ok {
 		w.Header().Set("Sec-Websocket-Version", "13")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
@@ -139,8 +137,8 @@ func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
 	client := &Client{
 		conn: c,
 		send: make(chan []byte, 1024), //todo 搞成配置
-		connId: tokenInfo.ConnId,
-		info: tokenInfo.Info,
+		connId: connId,
+		info: clientInfo,
 		server: s,
 	}
 
@@ -155,30 +153,27 @@ func (s Server) responseWsUnauthorized(w http.ResponseWriter) { //todo 移动到
 	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 }
 
-type TokenInfo struct {
-	ConnId	string	`json:"conn_id"` //唯一分配的conn_id
-	Token	string	`json:"token"` //授权token
-	Info	string	`json:"info"`	//一些其他信息 json 串
-}
-
-func (s Server) checkToken(query map[string][]string) (*TokenInfo, error) {
+func (s Server) checkToken(query map[string][]string) (string, string, error) {
+	if c, ok := query["c"]; !ok || len(c) < 1 {
+		return "", "", errors.New("缺少参数c")
+	}
 	if t, ok := query["t"]; !ok || len(t) < 1 {
-		return nil, errors.New("确实参数")
+		return "", "", errors.New("缺少参数t")
 	}
-	t := query["t"][0]
-
-	var tokenInfo TokenInfo
-	if err := json.Unmarshal([]byte(t), &tokenInfo); err != nil {
-		color.Red("消息体异常, 不能解析 %v %v", t, reflect.TypeOf(t))
-		return nil, errors.New("消息体异常, 不能解析")
+	if i, ok := query["i"]; !ok || len(i) < 1 {
+		return "", "", errors.New("缺少参数i")
 	}
 
-	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", tokenInfo.ConnId, tokenInfo.Token, tokenInfo.Info, s.GetRpcAddr()); err != nil {
+	connId := query["c"][0]
+	token := query["t"][0]
+	clientInfo := query["i"][0]
+
+	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", connId, token, clientInfo, s.GetRpcAddr()); err != nil {
 		color.Red(err.Error())
-		return nil, errors.New("授权失败" + err.Error())
+		return "", "", errors.New("授权失败" + err.Error())
 	}
 
-	return &tokenInfo, nil
+	return connId, clientInfo, nil
 }
 
 func (s *Server) SendToConnections(connections []string, msg string) ([]string, error) {
