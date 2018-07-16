@@ -58,7 +58,7 @@ go build -o comet main.go
 
 mac上编译debian版本, build debian bin on mac
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o comet main.go
 ```
 
 ## 运行 Run
