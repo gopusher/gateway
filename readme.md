@@ -29,7 +29,7 @@ Gopusher Comet 是一个支持分布式部署的通用长连接接入层服务�
 * multi-protocol support, websocket is already supported, tcp is coming soon
 * cluster support
 * developer friendly, rpc call using http api to make develop with any program languages easily( You don't need to learn golang, just run comet. )
-* Support running with docker  ([running with docker](https://github.com/Gopusher/comet/tree/master/docker))
+* Support running with docker  ([running with docker](https://github.com/Gopusher/awesome/tree/master/docker/comet))
 
 ## 安装 Installation
 
