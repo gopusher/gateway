@@ -2,7 +2,7 @@ package service
 
 import (
 	"net/rpc"
-	"gopusher/comet/contracts"
+	"github.com/gopusher/comet/contracts"
 	"net"
 	"net/rpc/jsonrpc"
 	"encoding/json"

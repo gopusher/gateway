@@ -4,11 +4,11 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"log"
-	"gopusher/comet/config"
+	"github.com/gopusher/comet/config"
 	"errors"
 	"fmt"
 	"github.com/fatih/color"
-	"gopusher/comet/rpc"
+	"github.com/gopusher/comet/rpc"
 )
 
 type Server struct {

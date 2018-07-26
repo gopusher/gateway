@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"runtime"
-	c "gopusher/comet/config"
-	"gopusher/comet/contracts"
-	"gopusher/comet/connection/websocket"
-	"gopusher/comet/service"
+	c "github.com/gopusher/comet/config"
+	"github.com/gopusher/comet/contracts"
+	"github.com/gopusher/comet/connection/websocket"
+	"github.com/gopusher/comet/service"
 	"fmt"
-	"gopusher/comet/discovery"
-	"gopusher/comet/rpc"
+	"github.com/gopusher/comet/discovery"
+	"github.com/gopusher/comet/rpc"
 	"github.com/fatih/color"
 )
 
