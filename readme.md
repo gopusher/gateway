@@ -12,7 +12,7 @@ Gopusher Comet 是一个支持分布式部署的通用长连接接入层服务�
 
 ## 开发指南 Develop Guide
 
-* [wiki](https://github.com/Gopusher/comet/wiki)
+* [Wiki](https://github.com/Gopusher/comet/wiki): 包含所有的开发文档和API, All Develop Guide And API Wiki.
 * QQ交流群: 818628641
 
 ## 特性
