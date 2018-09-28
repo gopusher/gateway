@@ -32,9 +32,9 @@ func NewWebSocketServer(config *config.Config, rpcClient *rpc.Client) *Server {
 		},
 	}
 
-	wsPort := ":" + config.Get("websocket_port").MustString("8900")
-	rpcPort := ":" + config.Get("comet_rpc_port").MustString("8901")
-	rpcAddr := config.Get("comet_rpc_addr").MustString("127.0.0.1")
+	wsPort := ":" + config.Get("WEBSOCKET_PORT").MustString("8900")
+	rpcPort := ":" + config.Get("COMET_RPC_PORT").MustString("8901")
+	rpcAddr := config.Get("COMET_RPC_ADDR").MustString("127.0.0.1")
 
 	return &Server{
 		config: config,
@@ -69,10 +69,10 @@ func (s *Server) initWsServer() {
 	serverMux.HandleFunc("/ws", s.serveWs)
 
 	log.Println("[info] websocket server start running " + s.wsPort)
-	websocketProtocol := s.config.Get("socket_protocol").MustString("ws")
+	websocketProtocol := s.config.Get("SOCKET_PROTOCOL").MustString("ws")
 	if websocketProtocol == "wss" {
-		wssCertPem := s.config.Get("wss_cert_pem").String()
-		wssKeyPem := s.config.Get("wss_key_pem").MustString("ws")
+		wssCertPem := s.config.Get("WSS_CERT_PEM").String()
+		wssKeyPem := s.config.Get("WSS_KEY_PEM").MustString("ws")
 		if err := http.ListenAndServeTLS(s.wsPort, wssCertPem, wssKeyPem, serverMux); err != nil {
 			log.Fatal("服务启动失败:" + err.Error())
 			panic(err)

@@ -26,11 +26,11 @@ func main() {
 	filename, isMonitor := getArgs()
 
 	config := c.NewConfig(*filename)
-	runtime.GOMAXPROCS(config.Get("max_proc").MustInt(runtime.NumCPU()))
-	cometServiceName := config.Get("comet_service_name").MustString("comet")
-	etcdAddr := []string{config.Get("etcd_addr").String()}
+	runtime.GOMAXPROCS(config.Get("MAX_PROC").MustInt(runtime.NumCPU()))
+	cometServiceName := config.Get("COMET_SERVICE_NAME").MustString("comet")
+	etcdAddr := []string{config.Get("ETCD_ADDR").String()}
 
-	rpcClient := rpc.NewClient(config.Get("rpc_api_url").String(), config.Get("rpc_user_agent").String())
+	rpcClient := rpc.NewClient(config.Get("RPC_API_URL").String(), config.Get("RPC_USER_AGENT").String())
 
 	discoveryService := discovery.NewDiscovery(etcdAddr, cometServiceName)
 	if *isMonitor {
@@ -43,14 +43,14 @@ func main() {
 
 	go server.Run()
 
-	go service.InitRpcServer(server, config.Get("comet_rpc_token").MustString("token"))
+	go service.InitRpcServer(server, config.Get("COMET_RPC_TOKEN").MustString("token"))
 
 	//join cluster
 	joinCluster(discoveryService, server.GetRpcAddr())
 }
 
 func getCometServer(config *c.Config, rpcClient *rpc.Client) contracts.Server {
-	socketProtocol := config.Get("socket_protocol").MustString("ws")
+	socketProtocol := config.Get("SOCKET_PROTOCOL").MustString("ws")
 	switch socketProtocol {
 	case "ws":
 		fallthrough
