@@ -56,7 +56,7 @@ func (c Client) send(class string, method string, args ...interface{}) (string, 
 	if resp.StatusCode == 200 {
 		ret, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			color.Red("rpc 请求失败3，StatusCode 非 200:" + err.Error())
+			color.Red("rpc 请求失败3，StatusCode 200:" + err.Error())
 			return "", err
 		}
 		return string(ret), nil
@@ -64,11 +64,12 @@ func (c Client) send(class string, method string, args ...interface{}) (string, 
 
 	ret, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		color.Red(fmt.Sprintf("rpc 请求异常4, %d: %v", resp.StatusCode, err.Error()))
+		color.Red(fmt.Sprintf("rpc 请求异常4, StatusCode %d: %v", resp.StatusCode, err.Error()))
 		return "", errors.New(fmt.Sprintf("请求异常%d: %v", resp.StatusCode, err.Error()))
 	}
 
-	return string(ret), nil
+	color.Red(fmt.Sprintf("rpc 请求异常4, StatusCode %d: %s", resp.StatusCode, string(ret)))
+	return "", errors.New(string(ret))
 }
 
 func (c Client) SuccessRpc(class string, method string, args ...interface{}) (string, error) {
