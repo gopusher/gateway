@@ -86,6 +86,36 @@ func (s *Server) SendToConnections(message *Message, reply *string) error {
 	return nil
 }
 
+type BroadcastMessage struct {
+	Msg 			string		`json"msg"` 		//为一个json，里边包含 type 消息类型
+	Token			string		`json"token"` 		//作为消息发送鉴权
+}
+
+func (s *Server) Broadcast(message *BroadcastMessage, reply *string) error {
+	type Response struct {
+		ErrInfo	string		`json:"msg"`
+	}
+
+	if message.Token != s.token {
+		response, _ := json.Marshal(&Response{
+			ErrInfo: "token error.",
+		})
+		return errors.New(string(response))
+	}
+
+	if message.Msg == "" {
+		response, _ := json.Marshal(&Response{
+			ErrInfo: "empty msg.",
+		})
+		return errors.New(string(response))
+	}
+
+	go s.server.Broadcast(message.Msg)
+
+	*reply = "ok"
+	return nil
+}
+
 type KickMessage struct {
 	Connections		[]string	`json"connections"`	//消息接受者
 	Token			string		`json"token"` 		//作为消息发送鉴权
@@ -93,13 +123,11 @@ type KickMessage struct {
 
 func (s *Server) KickConnections(kickMessage *KickMessage, reply *string) error {
 	type Response struct {
-		ErrIds	[]string	`json:"ids"`
 		ErrInfo	string		`json:"msg"`
 	}
 
 	if kickMessage.Token != s.token {
 		response, _ := json.Marshal(&Response{
-			ErrIds: []string{},
 			ErrInfo: "token error.",
 		})
 		return errors.New(string(response))

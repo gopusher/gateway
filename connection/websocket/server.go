@@ -169,8 +169,8 @@ func (s Server) checkToken(query map[string][]string) (string, string, error) {
 	clientInfo := query["i"][0]
 
 	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", connId, token, clientInfo, s.GetRpcAddr()); err != nil {
-		color.Red(err.Error())
-		return "", "", errors.New("授权失败" + err.Error())
+		color.Red("connId: " + connId + " checkToken失败: " + err.Error())
+		return "", "", errors.New("checkToken失败: " + err.Error())
 	}
 
 	return connId, clientInfo, nil
@@ -188,6 +188,12 @@ func (s *Server) SendToConnections(connections []string, msg string) ([]string, 
 	}
 
 	return []string{}, nil
+}
+
+func (s *Server) Broadcast(msg string) {
+	for connId := range s.clients {
+		s.SendToConnection(connId, msg)
+	}
 }
 
 func (s *Server) SendToConnection(connId string, msg string) error {
@@ -209,12 +215,10 @@ func (s *Server) SendToConnection(connId string, msg string) error {
 	return errors.New(fmt.Sprintf("发送消息失败, 客户端不在维护中, to %s", connId))
 }
 
-func (s *Server) KickConnections(connections []string) error {
+func (s *Server) KickConnections(connections []string) {
 	for _, connId := range connections {
 		if client, ok := s.clients[connId]; ok {
 			s.unregister <- client
 		}
 	}
-
-	return nil
 }

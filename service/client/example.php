@@ -54,6 +54,19 @@ class JsonRPC
         return $this->execute($host, $port, $data);
     }
 
+    public function Broadcast($host, $port, $token, $msg)
+    {
+        $data = array(
+            'method' => "Server.Broadcast",
+            'params' => [[
+                'msg'           => $msg,
+                'token'         => $token
+            ]],
+        );
+
+        return $this->execute($host, $port, $data);
+    }
+
     public function KickConnections($host, $port, $token, array $connections)
     {
         $data = array(
@@ -88,11 +101,21 @@ class JsonRPC
 
 
 /** 发消息 **/
-if (count($argv) < 3) {
+// if (count($argv) < 3) {
+//     throw new Exception('消息发送参数格式: php ./example.php msg ...to');
+// }
+// $client = new JsonRPC();
+// $r = $client->SendToConnections("message.demo.com", 8901, 'token', array_slice($argv, 2), $argv[1]);
+// var_export($r);
+// exit;
+/** 发消息 end **/
+
+/** 广播 **/
+if (count($argv) < 2) {
     throw new Exception('消息发送参数格式: php ./example.php msg ...to');
 }
 $client = new JsonRPC();
-$r = $client->SendToConnections("192.168.3.165", 8901, 'token', array_slice($argv, 2), $argv[1]);
+$r = $client->Broadcast("message.demo.com", 8901, 'token', $argv[1]);
 var_export($r);
 exit;
-/** 发消息 end **/
+/** 广播 end **/
