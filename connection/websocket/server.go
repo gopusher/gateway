@@ -222,3 +222,17 @@ func (s *Server) KickConnections(connections []string) {
 		}
 	}
 }
+
+func (s *Server) CheckConnectionsOnline(connections []string) ([]string, error) {
+	var errIds []string
+	for _, connId := range connections {
+		if _, ok := s.clients[connId]; ! ok {
+			errIds = append(errIds, connId)
+		}
+	}
+	if len(errIds) > 0 {
+		return errIds, errors.New("存在不在线")
+	}
+
+	return []string{}, nil
+}

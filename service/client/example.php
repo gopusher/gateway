@@ -80,6 +80,19 @@ class JsonRPC
         return $this->execute($host, $port, $data);
     }
 
+    public function CheckConnectionsOnline($host, $port, $token, array $connections)
+    {
+        $data = array(
+            'method' => "Server.CheckConnectionsOnline",
+            'params' => [[
+                'connections'   => array_values(array_unique($connections)),
+                'token'         => $token
+            ]],
+        );
+
+        return $this->execute($host, $port, $data);
+    }
+
     public function __construct()
     {
         foreach (self::$obj as $conn) {
@@ -94,7 +107,7 @@ class JsonRPC
 // }
 //
 // $client = new JsonRPC();
-// $r = $client->KickConnections("192.168.3.165", 8901, 'token', array_slice($argv, 1));
+// $r = $client->KickConnections("message.demo.com", 8901, 'token', array_slice($argv, 1));
 // var_export($r);
 // exit;
 /** kick conn end **/
@@ -111,11 +124,21 @@ class JsonRPC
 /** 发消息 end **/
 
 /** 广播 **/
+// if (count($argv) < 2) {
+//     throw new Exception('消息发送参数格式: php ./example.php msg');
+// }
+// $client = new JsonRPC();
+// $r = $client->Broadcast("message.demo.com", 8901, 'token', $argv[1]);
+// var_export($r);
+// exit;
+/** 广播 end **/
+
+/** 检测是否在线 **/
 if (count($argv) < 2) {
-    throw new Exception('消息发送参数格式: php ./example.php msg ...to');
+    throw new Exception('消息发送参数格式: php ./example.php ...connections');
 }
 $client = new JsonRPC();
-$r = $client->Broadcast("message.demo.com", 8901, 'token', $argv[1]);
+$r = $client->CheckConnectionsOnline("message.demo.com", 8901, 'token', array_slice($argv, 1));
 var_export($r);
 exit;
-/** 广播 end **/
+/** 检测是否在线 end **/

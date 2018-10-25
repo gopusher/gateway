@@ -7,4 +7,5 @@ type Server interface {
 	GetRpcAddr() string
 	GetRpcPort() string
 	KickConnections(connections []string)
+	CheckConnectionsOnline(connections []string) ([]string, error)
 }

@@ -86,6 +86,45 @@ func (s *Server) SendToConnections(message *Message, reply *string) error {
 	return nil
 }
 
+type CheckConnectionsMessage struct {
+	Connections		[]string	`json"connections"`	//消息接受者
+	Token			string		`json"token"` 		//作为消息发送鉴权
+}
+
+func (s *Server) CheckConnectionsOnline(message *CheckConnectionsMessage, reply *string) error {
+	type Response struct {
+		ErrIds	[]string	`json:"ids"`
+		ErrInfo	string		`json:"msg"`
+	}
+
+	if message.Token != s.token {
+		response, _ := json.Marshal(&Response{
+			ErrIds: []string{},
+			ErrInfo: "token error.",
+		})
+		return errors.New(string(response))
+	}
+
+	if len(message.Connections) == 0 {
+		response, _ := json.Marshal(&Response{
+			ErrIds: []string{},
+			ErrInfo: "empty connections.",
+		})
+		return errors.New(string(response))
+	}
+
+	if errIds, err := s.server.CheckConnectionsOnline(message.Connections); err != nil {
+		response, _ := json.Marshal(&Response{
+			ErrIds: errIds,
+			ErrInfo: "CheckConnections failed, " + err.Error(),
+		})
+		return errors.New(string(response))
+	}
+
+	*reply = "ok"
+	return nil
+}
+
 type BroadcastMessage struct {
 	Msg 			string		`json"msg"` 		//为一个json，里边包含 type 消息类型
 	Token			string		`json"token"` 		//作为消息发送鉴权
