@@ -6,9 +6,9 @@ Gopusher Comet 是一个支持分布式部署的通用长连接接入层服务�
 
 > demo: [https://chat.yadou.net](https://chat.yadou.net)
 >
-> 这是一个用php开发的聊天应用([源码](https://github.com/Gopusher/message))，采用comet作为长连接接入层，采用php开发聊天的路由和逻辑层部分。
+> 这是一个用php开发的聊天应用([源码](https://github.com/Gopusher/laravel-chat))，采用comet作为长连接接入层，采用php开发聊天的路由和逻辑层部分。
 >
-> This is a chat application developed in php ([code souce](https://github.com/Gopusher/message)), using comet service to handle all client persistent connections, and using php language develop the chat routing and  logical layer.
+> This is a chat application developed in php ([code souce](https://github.com/Gopusher/laravel-chat)), using comet service to handle all client persistent connections, and using php language develop the chat routing and  logical layer.
 
 ## 开发指南 Develop Guide
 
@@ -21,7 +21,7 @@ Gopusher Comet 是一个支持分布式部署的通用长连接接入层服务�
 * 多协议支持，websocket 已经支持，tcp 在开发中
 * 集群支持
 * 开发者友好，采用http api的方式进行rpc调用，便于不同语言的接入开发（你不需要学习golang，只需要运行comet。）
-* 支持docker方式运行 ([docker 运行](https://github.com/Gopusher/awesome/tree/master/docker))
+* 支持 ***docker-compose方式运行*** ([docker-compose 运行](https://github.com/Gopusher/awesome/tree/master/docker))
 
 ## Features
 
