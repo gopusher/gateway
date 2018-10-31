@@ -7,10 +7,10 @@ import (
 	"github.com/gopusher/comet/contracts"
 	"github.com/gopusher/comet/connection/websocket"
 	"github.com/gopusher/comet/service"
-	"fmt"
 	"github.com/gopusher/comet/discovery"
 	"github.com/gopusher/comet/rpc"
 	"github.com/fatih/color"
+	"log"
 )
 
 func getArgs() (filename *string, isMonitor *bool) {
@@ -69,26 +69,26 @@ func joinCluster(discoveryService *discovery.Discovery, rpcAddr string) {
 
 func addComet(rpcClient *rpc.Client) func(string, string) {
 	return func(node string, revision string) {
-		fmt.Printf("增加节点: node: %s, revision: %s \n", node, revision)
+		log.Printf("增加节点: node: %s, revision: %s \n", node, revision)
 
 		if _, err := rpcClient.SuccessRpc("Im", "addCometServer", node, revision); err != nil {
 			color.Red("增加节点失败: " + err.Error())
 			return
 		}
 
-		fmt.Printf("完成通知增加节点: node: %s, revision: %s \n", node, revision)
+		log.Printf("完成通知增加节点: node: %s, revision: %s \n", node, revision)
 	}
 }
 
 func delComet(rpcClient *rpc.Client) func(string, string) {
 	return func(node string, revision string) {
-		fmt.Printf("移除节点: node: %s, revision: %s \n", node, revision)
+		log.Printf("移除节点: node: %s, revision: %s \n", node, revision)
 
 		if _, err := rpcClient.SuccessRpc("Im", "removeCometServer", node, revision); err != nil {
 			color.Red("移除节点失败: " + err.Error())
 			return
 		}
 
-		fmt.Printf("完成通知移除节点: node: %s, revision: %s \n", node, revision)
+		log.Printf("完成通知移除节点: node: %s, revision: %s \n", node, revision)
 	}
 }
