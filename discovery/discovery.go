@@ -57,7 +57,7 @@ func (discovery *Discovery) KeepAlive(node string) {
 		panic(err)
 	}
 
-	fmt.Printf("node: %s, revision: %s, 加入集群成功\n", node, revision)
+	log.Printf("node: %s, revision: %s, 加入集群成功\n", node, revision)
 
 	curLeaseId = leaseResp.ID
 
