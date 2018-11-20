@@ -2,10 +2,10 @@ package contracts
 
 type Server interface {
 	Run()
-	Broadcast(msg string)
 	SendToConnections(connections []string, msg string) ([]string, error)
-	GetRpcAddr() string
-	GetRpcPort() string
+	Broadcast(msg string)
 	KickConnections(connections []string)
-	CheckConnectionsOnline(connections []string) ([]string, error)
+	KickAllConnections()
+	CheckConnectionsOnline(connections []string) []string
+	GetAllConnections() []string
 }

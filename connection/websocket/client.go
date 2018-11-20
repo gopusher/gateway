@@ -1,20 +1,18 @@
 package websocket
 
 import (
-	"log"
 	"github.com/gorilla/websocket"
 	"time"
-)
+	)
 
 type Client struct {
 	conn *websocket.Conn
 	send chan []byte
 	connId string
-	info string
 	server Server
 }
 
-const ( //TODO 搞成配置
+const (
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
 
@@ -28,18 +26,17 @@ const ( //TODO 搞成配置
 	maxMessageSize = 512
 )
 
-var (
-	newline = []byte{'\n'}
-	//space   = []byte{' '}
-)
+//var (
+//	newline = []byte{'\n'}
+//)
 
 func (c *Client) Write() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
-		// log.Println("[info] write失败")
 		ticker.Stop()
 		c.conn.Close()
 	}()
+
 	for {
 		select {
 		case message, ok := <-c.send:
@@ -57,11 +54,11 @@ func (c *Client) Write() {
 			w.Write(message)
 
 			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
-			}
+			//n := len(c.send)
+			//for i := 0; i < n; i++ {
+			//	w.Write(newline)
+			//	w.Write(<-c.send)
+			//}
 
 			if err := w.Close(); err != nil {
 				return
@@ -77,28 +74,26 @@ func (c *Client) Write() {
 
 func (c *Client) Read() {
 	defer func() {
-		//log.Println("[info] Read 失败")
 		c.server.unregister <- c
 	}()
+
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		_, message, err := c.conn.ReadMessage()
+		//_, message, err := c.conn.ReadMessage()
+		_, _, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure) {
-				log.Printf("error: %v", err)
+				//log.Error("error: %v", err)
 			}
 			break
 		}
-		//message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		//c.hub.broadcast <- message
-		log.Println("[info] 收到消息" + string(message))
+		//log.Info("msg :" + string(message))
 	}
 }
 
 func (c *Client) Close() {
-	close(c.send)
 	c.conn.Close()
 	return
 }

@@ -3,28 +3,23 @@ package websocket
 import (
 	"github.com/gorilla/websocket"
 	"net/http"
-	"log"
-	"github.com/gopusher/comet/config"
+	"github.com/gopusher/gateway/configuration"
 	"errors"
-	"fmt"
-	"github.com/fatih/color"
-	"github.com/gopusher/comet/rpc"
+	"github.com/gopusher/gateway/notification"
+	"github.com/gopusher/gateway/log"
 )
 
 type Server struct {
-	config *config.Config
-	wsPort string
-	rpcAddr string
-	rpcPort string
-	rpcClient *rpc.Client
+	config *configuration.CometConfig
+	rpc *notification.Client
 	upgrader websocket.Upgrader
 	register chan *Client
 	unregister chan *Client
 	clients map[string]*Client
 }
 
-func NewWebSocketServer(config *config.Config, rpcClient *rpc.Client) *Server {
-	var upgrader = websocket.Upgrader{ //todo 搞成配置
+func NewWebSocketServer(config *configuration.CometConfig, rpc *notification.Client) *Server {
+	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
@@ -32,16 +27,9 @@ func NewWebSocketServer(config *config.Config, rpcClient *rpc.Client) *Server {
 		},
 	}
 
-	wsPort := ":" + config.Get("WEBSOCKET_PORT").MustString("8900")
-	rpcPort := ":" + config.Get("COMET_RPC_PORT").MustString("8901")
-	rpcAddr := config.Get("COMET_RPC_ADDR").MustString("127.0.0.1")
-
 	return &Server{
 		config: config,
-		wsPort: wsPort,
-		rpcPort: rpcPort,
-		rpcAddr: rpcAddr,
-		rpcClient: rpcClient,
+		rpc: rpc,
 		upgrader: upgrader,
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
@@ -55,31 +43,18 @@ func (s *Server) Run() {
 	s.initWsServer()
 }
 
-func (s *Server) GetRpcAddr() string {
-	return s.rpcAddr + s.rpcPort
-}
-
-func (s *Server) GetRpcPort() string {
-	return s.rpcPort
-}
-
-// 启动 websocket server
+// run websocket server
 func (s *Server) initWsServer() {
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/ws", s.serveWs)
 
-	log.Println("[info] websocket server start running " + s.wsPort)
-	websocketProtocol := s.config.Get("SOCKET_PROTOCOL").MustString("ws")
-	if websocketProtocol == "wss" {
-		wssCertPem := s.config.Get("WSS_CERT_PEM").String()
-		wssKeyPem := s.config.Get("WSS_KEY_PEM").MustString("ws")
-		if err := http.ListenAndServeTLS(s.wsPort, wssCertPem, wssKeyPem, serverMux); err != nil {
-			log.Fatal("服务启动失败:" + err.Error())
+	log.Info("Websocket server start running with " + s.config.SocketPort)
+	if s.config.SocketProtocol == "wss" {
+		if err := http.ListenAndServeTLS(s.config.SocketPort, s.config.SocketCertFile, s.config.SocketKeyFile, serverMux); err != nil {
 			panic(err)
 		}
 	} else {
-		if err := http.ListenAndServe(s.wsPort, serverMux); err != nil {
-			log.Fatal("服务启动失败:" + err.Error())
+		if err := http.ListenAndServe(s.config.SocketPort, serverMux); err != nil {
 			panic(err)
 		}
 	}
@@ -89,39 +64,39 @@ func (s *Server) handleClients() {
 	for {
 		select {
 		case client := <-s.register:
-			log.Println("[info] 注册客户端, connId: " + client.connId)
-
 			s.clients[client.connId] = client
 
-			//上报给 router api 服务
-			if _, err := s.rpcClient.SuccessRpc("Im", "online", client.connId, client.info, s.GetRpcAddr()); err != nil {
-				color.Red(err.Error())
+			//notify router api server
+			if _, err := s.rpc.Call("Online", client.connId, s.config.GatewayApiAddress); err != nil {
+				log.Error("Client online notification failed: %s", err.Error())
 			}
 		case client := <-s.unregister:
-			log.Println("[info] 断开连接，connId:" + client.connId)
-			//上报给 router api 服务
-			if _, err := s.rpcClient.SuccessRpc("Im", "offline", client.connId, client.info, s.GetRpcAddr()); err != nil {
-				color.Red(err.Error())
-			}
-
-			//关闭客户端连接
 			if _, ok := s.clients[client.connId]; ok {
 				delete(s.clients, client.connId)
+				close(client.send)
 				client.Close()
+
+				//notify router api server
+				if _, err := s.rpc.Call("Offline", client.connId, s.config.GatewayApiAddress); err != nil {
+					log.Error("Client online notification failed: %s", err.Error())
+				}
 			}
 		}
 	}
 }
 
 func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
-	//检查是否是有效连接
-	connId, clientInfo, err := s.checkToken(r.URL.Query())
+	connId, err := s.checkToken(r.URL.Query())
 	if err != nil {
-		s.responseWsUnauthorized(w)
+		log.Error("Check token failed, connId: %s, error: %s", connId, err.Error())
+
+		//Unauthorized
+		w.Header().Set("Sec-Websocket-Version", "13")
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 
-	//存在相同connId客户端连接
+	//There is the same connId client connection
 	if _, ok := s.clients[connId]; ok {
 		w.Header().Set("Sec-Websocket-Version", "13")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -130,15 +105,14 @@ func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
 
 	c, err := s.upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Error("Websocket upgrade failed: %s", err.Error())
 		return
 	}
 
 	client := &Client{
 		conn: c,
-		send: make(chan []byte, 1024), //todo 搞成配置
+		send: make(chan []byte, 1024),
 		connId: connId,
-		info: clientInfo,
 		server: s,
 	}
 
@@ -148,32 +122,38 @@ func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
 	go client.Read()
 }
 
-func (s Server) responseWsUnauthorized(w http.ResponseWriter) { //todo 移动到 message 中
-	w.Header().Set("Sec-Websocket-Version", "13")
-	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+func (s Server) checkToken(query map[string][]string) (string, error) {
+	if c, ok := query["c"]; !ok || len(c) < 1 {
+		return "", errors.New("need param c")
+	}
+	connId := query["c"][0]
+
+	if t, ok := query["t"]; !ok || len(t) < 1 {
+		return connId, errors.New("need param t")
+	}
+	token := query["t"][0]
+
+	if _, err := s.rpc.Call("CheckToken", connId, token, s.config.GatewayApiAddress); err != nil {
+		return "", err
+	}
+
+	return connId, nil
 }
 
-func (s Server) checkToken(query map[string][]string) (string, string, error) {
-	if c, ok := query["c"]; !ok || len(c) < 1 {
-		return "", "", errors.New("缺少参数c")
-	}
-	if t, ok := query["t"]; !ok || len(t) < 1 {
-		return "", "", errors.New("缺少参数t")
-	}
-	if i, ok := query["i"]; !ok || len(i) < 1 {
-		return "", "", errors.New("缺少参数i")
+func (s *Server) SendToConnection(connId string, msg string) error {
+	if client, ok := s.clients[connId]; ok {
+		select {
+		case client.send <- []byte(msg):
+			//log.Info("SendToConnection " + connId + ": " + msg)
+			return nil
+
+		default:
+			client.Close()
+			return errors.New("send message failed to " + connId)
+		}
 	}
 
-	connId := query["c"][0]
-	token := query["t"][0]
-	clientInfo := query["i"][0]
-
-	if _, err := s.rpcClient.SuccessRpc("Im", "checkToken", connId, token, clientInfo, s.GetRpcAddr()); err != nil {
-		color.Red("connId: " + connId + " checkToken失败: " + err.Error())
-		return "", "", errors.New("checkToken失败: " + err.Error())
-	}
-
-	return connId, clientInfo, nil
+	return errors.New("send message failed, connection: " + connId + " not found")
 }
 
 func (s *Server) SendToConnections(connections []string, msg string) ([]string, error) {
@@ -184,7 +164,7 @@ func (s *Server) SendToConnections(connections []string, msg string) ([]string, 
 		}
 	}
 	if len(errIds) > 0 {
-		return errIds, errors.New("存在发送失败的消息")
+		return errIds, errors.New("there are messages that failed to send to the connections")
 	}
 
 	return []string{}, nil
@@ -196,43 +176,37 @@ func (s *Server) Broadcast(msg string) {
 	}
 }
 
-func (s *Server) SendToConnection(connId string, msg string) error {
-	if client, ok := s.clients[connId]; ok {
-		select {
-		case client.send <- []byte(msg):
-			// log.Println("[info] SendToConnection " + to + ": " + msg)
-			return nil
-		default:
-			delete(s.clients, connId)
-			close(client.send) //是否需要 关闭 chan 的时候，发送完毕所有的chan再关闭连接 ??
-			//client.Close()
-			color.Red("发送消息失败, to: %s", connId)
-			return errors.New(fmt.Sprintf("发送消息失败, to %s", connId))
-		}
-	}
-
-	color.Red("发送消息失败, 客户端不在维护中, to: %s", connId)
-	return errors.New(fmt.Sprintf("发送消息失败, 客户端不在维护中, to %s", connId))
-}
-
 func (s *Server) KickConnections(connections []string) {
 	for _, connId := range connections {
 		if client, ok := s.clients[connId]; ok {
-			s.unregister <- client
+			client.Close()
 		}
 	}
 }
 
-func (s *Server) CheckConnectionsOnline(connections []string) ([]string, error) {
-	var errIds []string
+func (s *Server) KickAllConnections() {
+	for _, client := range s.clients {
+		client.Close()
+	}
+}
+
+func (s *Server) CheckConnectionsOnline(connections []string) []string {
+	var onlineConnections []string
 	for _, connId := range connections {
-		if _, ok := s.clients[connId]; ! ok {
-			errIds = append(errIds, connId)
+		if _, ok := s.clients[connId]; ok {
+			onlineConnections = append(onlineConnections, connId)
 		}
 	}
-	if len(errIds) > 0 {
-		return errIds, errors.New("存在不在线")
+
+	return onlineConnections
+}
+
+func (s *Server) GetAllConnections() []string {
+	var connectionIds []string
+
+	for connId := range s.clients {
+		connectionIds = append(connectionIds, connId)
 	}
 
-	return []string{}, nil
+	return connectionIds
 }

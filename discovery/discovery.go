@@ -8,24 +8,28 @@ import (
 	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	"fmt"
 	"github.com/coreos/etcd/mvcc/mvccpb"
-	"log"
+	"github.com/gopusher/gateway/log"
 )
 
 type Discovery struct {
-	etcdServer []string
+	etcdServers []string
 	serviceName string
 }
 
-func NewDiscovery(etcdServer []string, serviceName string) *Discovery {
+func NewDiscovery(etcdServers []string, serviceName string) *Discovery {
+	if serviceName == "" {
+		serviceName = "Gopusher"
+	}
+
 	return &Discovery{
-		etcdServer: etcdServer,
+		etcdServers: etcdServers,
 		serviceName: "/" + serviceName,
 	}
 }
 
 func (discovery *Discovery) getClient() *clientv3.Client {
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   discovery.etcdServer,
+		Endpoints:   discovery.etcdServers,
 		DialTimeout: 5 * time.Second,
 	})
 
@@ -49,7 +53,7 @@ func (discovery *Discovery) KeepAlive(node string) {
 	leaseResp, err := lease.Grant(ctx, int64(ttl + 1))
 
 	if err != nil {
-		panic("连接 etcd 失败")
+		panic("etcd connect failed.")
 	}
 
 	revision := fmt.Sprintf("%d", leaseResp.GetRevision() + 1)
@@ -57,7 +61,7 @@ func (discovery *Discovery) KeepAlive(node string) {
 		panic(err)
 	}
 
-	log.Printf("node: %s, revision: %s, 加入集群成功\n", node, revision)
+	log.Info("node: %s, revision: %s, join cluster success.", key, revision)
 
 	curLeaseId = leaseResp.ID
 
@@ -84,10 +88,10 @@ func (discovery *Discovery) Watch(addClient func(string, string), removeClient f
 	rangeResp, err := kv.Get(ctx, discovery.serviceName, clientv3.WithPrefix())
 
 	if err != nil {
-		panic("连接 etcd 失败")
+		panic("etcd connect failed.")
 	}
 
-	log.Println("[info] Comet Monitor is running")
+	log.Info("Comet Monitor is running, watch: %s", discovery.serviceName)
 
 	for _, kv := range rangeResp.Kvs {
 		addClient(string(kv.Key), string(kv.Value))

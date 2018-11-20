@@ -1,6 +1,10 @@
+# Todo
+* 所有的配置都要在log中体现 方便错误信息排查
+* 加入集群之前先等待api服务和ws服务启动后
+
 # Gopusher Comet
 
-Gopusher Comet 是一个支持分布式部署的通用长连接接入层服务，接管客户端连接。Gopusher Comet is a access layer service that handling all client persistent connections with distributed cluster deployment.
+Gopusher 是一个支持分布式部署的通用长连接接入层服务，接管客户端连接。Gopusher Comet is a access layer service that handling all client persistent connections with distributed cluster deployment.
 
 你可以很容易的使用 **http api** 来构建实时聊天，通知推送应用。You can use **http api** to develop a instant messaging application or a push notification application easily.
 
