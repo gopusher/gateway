@@ -1,7 +1,3 @@
-# Todo
-* 所有的配置都要在log中体现 方便错误信息排查
-* 加入集群之前先等待api服务和ws服务启动后
-
 # Gopusher Comet
 
 Gopusher 是一个支持分布式部署的通用长连接接入层服务，接管客户端连接。Gopusher Comet is a access layer service that handling all client persistent connections with distributed cluster deployment.
@@ -140,3 +136,6 @@ server {
 
 你也可以采用服务器下发comet ip port的方式来进行负载均衡，you can also use the method of sending the comet ip port to load balance.
 
+### Todo
+* 所有的配置都要在log中体现 方便错误信息排查
+* 加入集群之前先等待api服务和ws服务启动后
