@@ -53,7 +53,9 @@ func (discovery *Discovery) KeepAlive(node string) {
 	leaseResp, err := lease.Grant(ctx, int64(ttl + 1))
 
 	if err != nil {
-		panic("etcd connect failed.")
+		log.Warn("etcd connect failed.")
+		return
+		// panic("etcd connect failed.")
 	}
 
 	revision := fmt.Sprintf("%d", leaseResp.GetRevision() + 1)
@@ -61,7 +63,7 @@ func (discovery *Discovery) KeepAlive(node string) {
 		panic(err)
 	}
 
-	log.Info("node: %s, revision: %s, join cluster success.", key, revision)
+	log.Info("Comet join cluster success, node: %s, revision: %s", key, revision)
 
 	curLeaseId = leaseResp.ID
 

@@ -5,8 +5,8 @@ import (
 	"github.com/gopusher/gateway/configuration"
 	"github.com/gopusher/gateway/contracts"
 	"github.com/gopusher/gateway/connection/websocket"
-	"github.com/gopusher/gateway/api"
 	"github.com/gopusher/gateway/discovery"
+	"github.com/gopusher/gateway/api"
 )
 
 func Run() {
@@ -16,9 +16,9 @@ func Run() {
 
 	go server.Run()
 
-	go api.InitRpcServer(server, config)
+	go joinCluster(config)
 
-	joinCluster(config)
+	api.InitRpcServer(server, config)
 }
 
 func getCometServer(config *configuration.CometConfig) contracts.Server {
