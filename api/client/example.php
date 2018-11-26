@@ -117,6 +117,18 @@ class JsonRPC
         return $this->execute($host, $port, $data);
     }
 
+    public function GetNodeId($host, $port, $token)
+    {
+        $data = array(
+            'method' => "Server.GetNodeId",
+            'params' => [[
+                'token'         => $token
+            ]],
+        );
+
+        return $this->execute($host, $port, $data);
+    }
+
     public function __destruct()
     {
         foreach (self::$obj as $conn) {
@@ -176,6 +188,13 @@ class JsonRPC
 /** kick all connections **/
 // $client = new JsonRPC();
 // $r = $client->KickAllConnections("message.demo.com", 8901, 'token');
+// var_export($r);
+// exit;
+/** kick all connections end **/
+
+/** kick all connections **/
+// $client = new JsonRPC();
+// $r = $client->GetNodeId("message.demo.com", 8901, 'token');
 // var_export($r);
 // exit;
 /** kick all connections end **/
