@@ -67,7 +67,7 @@ func (s *Server) handleClients() {
 			s.clients[client.connId] = client
 
 			//notify router api server
-			if _, err := s.rpc.Call("Online", client.connId, s.config.GatewayApiAddress); err != nil {
+			if _, err := s.rpc.Call("Online", client.connId, s.config.NodeId); err != nil {
 				log.Error("Client online notification failed: %s", err.Error())
 			}
 		case client := <-s.unregister:
@@ -77,7 +77,7 @@ func (s *Server) handleClients() {
 				client.Close()
 
 				//notify router api server
-				if _, err := s.rpc.Call("Offline", client.connId, s.config.GatewayApiAddress); err != nil {
+				if _, err := s.rpc.Call("Offline", client.connId, s.config.NodeId); err != nil {
 					log.Error("Client online notification failed: %s", err.Error())
 				}
 			}
@@ -133,7 +133,7 @@ func (s Server) checkToken(query map[string][]string) (string, error) {
 	}
 	token := query["t"][0]
 
-	if _, err := s.rpc.Call("CheckToken", connId, token, s.config.GatewayApiAddress); err != nil {
+	if _, err := s.rpc.Call("CheckToken", connId, token, s.config.NodeId); err != nil {
 		return "", err
 	}
 
