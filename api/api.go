@@ -8,8 +8,6 @@ import (
 	"github.com/gopusher/gateway/log"
 	"github.com/gopusher/gateway/configuration"
 	"encoding/json"
-	"strconv"
-	"time"
 )
 
 type Server struct {
@@ -19,9 +17,8 @@ type Server struct {
 }
 
 func InitRpcServer(server contracts.Server, config *configuration.CometConfig) {
-	nodeId := strconv.FormatInt(time.Now().UnixNano(), 10)
 	rpc.Register(&Server{
-		nodeId: nodeId,
+		nodeId: config.NodeId,
 		server: server,
 		token: config.GatewayApiToken,
 	})
@@ -31,7 +28,7 @@ func InitRpcServer(server contracts.Server, config *configuration.CometConfig) {
 		panic("Gateway api server run failed, error: %s" + err.Error())
 	}
 
-	log.Info("Gateway api server start running, NodeId: %s, GatewayApiAddress: %s", nodeId, config.GatewayApiAddress, )
+	log.Info("Gateway api server start running, NodeId: %s, GatewayApiAddress: %s", config.NodeId, config.GatewayApiAddress, )
 	for {
 		conn, err := listener.Accept()
 		if err != nil {

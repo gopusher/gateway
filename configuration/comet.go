@@ -3,9 +3,12 @@ package configuration
 import (
     "os"
     "strings"
+	"strconv"
+	"time"
 )
 
 type CometConfig struct {
+	NodeId 					string
 	SocketProtocol			string
 	SocketAddress			string
 	SocketPort				string
@@ -21,6 +24,7 @@ type CometConfig struct {
 }
 
 func GetCometConfig() *CometConfig {
+
 	socketAddress := os.Getenv("SOCKET_ADDRESS")
 	socketAddressSlice := strings.Split(socketAddress, ":")
 	if len(socketAddressSlice) != 3 {
@@ -33,12 +37,16 @@ func GetCometConfig() *CometConfig {
 		panic("error env: SOCKET_ADDRESS")
 	}
 
+	nodeId := gatewayApiAddress + ":" + strconv.FormatInt(time.Now().UnixNano(), 10)
+
 	notificationUserAgent := os.Getenv("NOTIFICATION_USER_AGENT")
 	if notificationUserAgent == "" {
 		notificationUserAgent = "Gopusher 1.0"
 	}
 
 	return &CometConfig {
+		NodeId: nodeId,
+
 		SocketProtocol: os.Getenv("SOCKET_PROTOCOL"),
 		SocketAddress: socketAddress,
 		SocketPort: ":" + socketAddressSlice[2:][0],
