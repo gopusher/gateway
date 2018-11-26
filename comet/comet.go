@@ -5,7 +5,6 @@ import (
 	"github.com/gopusher/gateway/configuration"
 	"github.com/gopusher/gateway/contracts"
 	"github.com/gopusher/gateway/connection/websocket"
-	"github.com/gopusher/gateway/discovery"
 	"github.com/gopusher/gateway/api"
 )
 
@@ -15,8 +14,6 @@ func Run() {
 	server := getCometServer(config)
 
 	go server.Run()
-
-	go joinCluster(config)
 
 	api.InitRpcServer(server, config)
 }
@@ -34,9 +31,4 @@ func getCometServer(config *configuration.CometConfig) contracts.Server {
 	default:
 		panic("Unsupported protocol: " + config.SocketProtocol)
 	}
-}
-
-func joinCluster(config *configuration.CometConfig) {
-	node := config.SocketAddress + "-" + config.GatewayApiAddress + "-" + config.GatewayApiToken
-	discovery.NewDiscovery(config.EtcdServers, config.ServiceName).KeepAlive(node)
 }

@@ -1,14 +1,11 @@
 package configuration
 
 import (
-	"os"
-	"strings"
-	)
+    "os"
+    "strings"
+)
 
 type CometConfig struct {
-	EtcdServers 			[]string
-	ServiceName				string
-
 	SocketProtocol			string
 	SocketAddress			string
 	SocketPort				string
@@ -24,17 +21,6 @@ type CometConfig struct {
 }
 
 func GetCometConfig() *CometConfig {
-	etcdServersEnv := os.Getenv("ETCD_SERVER_ADDRESSES")
-	if etcdServersEnv == "" {
-		panic("need env: ETCD_SERVER_ADDRESSES")
-	}
-	etcdServers := strings.Split(etcdServersEnv, ",")
-
-	serviceName := os.Getenv("GOPUSHER_SERVICE_NAME")
-	if serviceName == "" {
-		serviceName = "Gopusher"
-	}
-
 	socketAddress := os.Getenv("SOCKET_ADDRESS")
 	socketAddressSlice := strings.Split(socketAddress, ":")
 	if len(socketAddressSlice) != 3 {
@@ -53,9 +39,6 @@ func GetCometConfig() *CometConfig {
 	}
 
 	return &CometConfig {
-		EtcdServers: etcdServers,
-		ServiceName: serviceName,
-
 		SocketProtocol: os.Getenv("SOCKET_PROTOCOL"),
 		SocketAddress: socketAddress,
 		SocketPort: ":" + socketAddressSlice[2:][0],

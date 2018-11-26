@@ -3,7 +3,7 @@ package websocket
 import (
 	"github.com/gorilla/websocket"
 	"time"
-	)
+)
 
 type Client struct {
 	conn *websocket.Conn

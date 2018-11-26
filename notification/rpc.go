@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"errors"
 	"fmt"
-		"bytes"
+	"bytes"
 	"io/ioutil"
 	"reflect"
 	"github.com/gopusher/gateway/log"
