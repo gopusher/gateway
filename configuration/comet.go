@@ -10,7 +10,6 @@ import (
 type CometConfig struct {
 	NodeId 					string
 	SocketProtocol			string
-	SocketAddress			string
 	SocketPort				string
 	SocketCertFile			string
 	SocketKeyFile			string
@@ -24,16 +23,10 @@ type CometConfig struct {
 }
 
 func GetCometConfig() *CometConfig {
-	socketAddress := os.Getenv("SOCKET_ADDRESS")
-	socketAddressSlice := strings.Split(socketAddress, ":")
-	if len(socketAddressSlice) != 3 {
-		panic("error env: SOCKET_ADDRESS")
-	}
-
 	gatewayApiAddress := os.Getenv("GATEWAY_API_ADDRESS")
 	gatewayApiAddressSlice := strings.Split(gatewayApiAddress, ":")
 	if len(gatewayApiAddressSlice) != 2 {
-		panic("error env: SOCKET_ADDRESS")
+		panic("error env: GATEWAY_API_ADDRESS")
 	}
 
 	nodeId := gatewayApiAddress + ":" + strconv.FormatInt(time.Now().UnixNano(), 10)
@@ -47,8 +40,7 @@ func GetCometConfig() *CometConfig {
 		NodeId: nodeId,
 
 		SocketProtocol: os.Getenv("SOCKET_PROTOCOL"),
-		SocketAddress: socketAddress,
-		SocketPort: ":" + socketAddressSlice[2:][0],
+		SocketPort: ":" + os.Getenv("SOCKET_PORT"),
 		SocketCertFile: os.Getenv("SOCKET_CERT_FILE"),
 		SocketKeyFile: os.Getenv("SOCKET_KEY_FILE"),
 
