@@ -28,7 +28,7 @@ func InitRpcServer(server contracts.Server, config *configuration.CometConfig) {
 		panic("Gateway api server run failed, error: %s" + err.Error())
 	}
 
-	log.Info("Gateway api server start running, NodeId: %s, GatewayApiAddress: %s", config.NodeId, config.GatewayApiAddress, )
+	log.Info("Gateway api server start running, NodeId: %s, GatewayApiAddress: %s, Token: %s", config.NodeId, config.GatewayApiAddress, config.GatewayApiToken)
 	for {
 		conn, err := listener.Accept()
 		if err != nil {

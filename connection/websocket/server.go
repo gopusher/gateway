@@ -48,7 +48,7 @@ func (s *Server) initWsServer() {
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/ws", s.serveWs)
 
-	log.Info("Websocket server start running with " + s.config.SocketPort)
+	log.Info("Websocket server start running with SocketProtocol: %s, Listen:\"%s\"", s.config.SocketProtocol, s.config.SocketPort)
 	if s.config.SocketProtocol == "wss" {
 		if err := http.ListenAndServeTLS(s.config.SocketPort, s.config.SocketCertFile, s.config.SocketKeyFile, serverMux); err != nil {
 			panic(err)
