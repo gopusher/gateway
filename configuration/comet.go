@@ -24,7 +24,6 @@ type CometConfig struct {
 }
 
 func GetCometConfig() *CometConfig {
-
 	socketAddress := os.Getenv("SOCKET_ADDRESS")
 	socketAddressSlice := strings.Split(socketAddress, ":")
 	if len(socketAddressSlice) != 3 {

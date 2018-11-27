@@ -11,7 +11,9 @@ func main() {
 	filename := getArgs()
 
 	log.Info("Load config file: %s", *filename)
-	godotenv.Load(*filename)
+	if err := godotenv.Load(*filename); err != nil {
+		panic(err)
+	}
 
 	comet.Run()
 }
