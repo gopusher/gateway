@@ -44,10 +44,7 @@ Gopusher 是一个支持分布式部署的通用长连接接入层服务，接�
 ### 依赖 Dependencies
 
 ```
-go get github.com/coreos/etcd/clientv3
-go get github.com/gorilla/websocket
-go get github.com/fatih/color
-go get gopkg.in/ini.v1
+
 ```
 
 ### 编译 Build
@@ -74,36 +71,21 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -o comet-for-deb
 > Edit `comet.ini`
 
 ```
-# 最大的cpu执行数
-MAX_PROC=1
-# etcd 中 comet service name
-COMET_SERVICE_NAME=comet
-# etcd server addr
-ETCD_ADDR=127.0.0.1:2379
-# api addr
-RPC_API_URL=http://www.chat.com/im/index/rpc
-RPC_USER_AGENT="CtxImRpc 1.0"
-
-# 通信协议 协议，可选项 tcp(tcp需要后续开发), ws, wss (如果为 wss 需要设置 WSS_CERT_PEM 和 WSS_KEY_PEM)
+# ws | wss
 SOCKET_PROTOCOL=ws
-# websockeet 监听端口
-WEBSOCKET_PORT=8900
-# WSS_CERT_PEM=
-# WSS_KEY_PEM=
-# comet rpc 配置
-COMET_RPC_ADDR=192.168.3.142
-COMET_RPC_PORT=8901
-COMET_RPC_TOKEN=token
+SOCKET_PORT=8900
+# SOCKET_CERT_FILE=
+# SOCKET_KEY_FILE=
+
+GATEWAY_API_ADDRESS=127.0.0.1:8901
+GATEWAY_API_TOKEN=token
+
+NOTIFICATION_URL=http://message.demo.com/im/index/rpc
+NOTIFICATION_USER_AGENT="Gopusher"
 ```
 
 ### 运行 Run
-1. Run comet monitor
-
-```
-./comet -c comet.ini -m
-```
-
-2. Run comet
+1. Run comet
 
 ```
 ./comet -c comet.ini
@@ -135,8 +117,4 @@ server {
 ```
 
 你也可以采用服务器下发comet ip port的方式来进行负载均衡，you can also use the method of sending the comet ip port to load balance.
-
-### Todo
-* 所有的配置都要在log中体现 方便错误信息排查
-* 加入集群之前先等待api服务和ws服务启动后
 
