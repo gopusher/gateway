@@ -44,18 +44,19 @@ Gopusher 是一个支持分布式部署的通用长连接接入层服务，接�
 ### 依赖 Dependencies
 
 ```
-
+go get github.com/gorilla/websocket
+go get github.com/joho/godotenv
 ```
 
 ### 编译 Build
 
 ```
-go build -o comet main.go
+CGO_ENABLED=0 go build -ldflags '-s -w' -o comet-for-linux main.go
 ```
 
-mac上编译debian版本, build debian bin on mac
+mac上编译linux版本, build linux bin file on mac
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -o comet-for-debian main.go
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -o comet-for-linux main.go
 ```
 
 ## 运行 Run
