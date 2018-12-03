@@ -8,4 +8,5 @@ type Server interface {
 	KickAllConnections()
 	CheckConnectionsOnline(connections []string) []string
 	GetAllConnections() []string
+	JoinCluster()
 }

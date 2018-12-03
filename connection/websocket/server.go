@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/gopusher/gateway/notification"
 	"github.com/gopusher/gateway/log"
+	"time"
 )
 
 type Server struct {
@@ -18,7 +19,7 @@ type Server struct {
 	clients map[string]*Client
 }
 
-func NewWebSocketServer(config *configuration.CometConfig, rpc *notification.Client) *Server {
+func NewWebSocketServer(config *configuration.CometConfig) *Server {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -27,6 +28,7 @@ func NewWebSocketServer(config *configuration.CometConfig, rpc *notification.Cli
 		},
 	}
 
+	rpc := notification.NewRpc(config.NotificationUrl, config.NotificationUserAgent)
 	return &Server{
 		config: config,
 		rpc: rpc,
@@ -209,4 +211,15 @@ func (s *Server) GetAllConnections() []string {
 	}
 
 	return connectionIds
+}
+
+func (s *Server) JoinCluster() {
+	//wait for rpc and ws server bootstrap
+	time.Sleep(time.Duration(5)*time.Second)
+	//notify router api server
+	if _, err := s.rpc.Call("JoinCluster", s.config.NodeId); err != nil {
+		log.Error("Gateway JoinCluster notification failed: %s", err.Error())
+	}
+
+	log.Info("Gateway JoinCluster notification success")
 }
