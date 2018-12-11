@@ -219,6 +219,7 @@ func (s *Server) JoinCluster() {
 	//notify router api server
 	if _, err := s.rpc.Call("JoinCluster", s.config.NodeId); err != nil {
 		log.Error("Gateway JoinCluster notification failed: %s", err.Error())
+		return
 	}
 
 	log.Info("Gateway JoinCluster notification success")

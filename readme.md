@@ -2,7 +2,7 @@
 
 Gopusher 是一个支持分布式部署的通用长连接接入层服务，接管客户端连接。Gopusher Comet is a access layer service that handling all client persistent connections with distributed cluster deployment.
 
-你可以很容易的使用 **http api** 来构建实时聊天，通知推送应用。You can use **http api** to develop a instant messaging application or a push notification application easily.
+你可以很容易的使用 **http api** 来构建实时聊天，通知推送等应用。You can use **http api** to develop a instant messaging application or a push notification application easily.
 
 > demo: [https://chat.yadou.net](https://chat.yadou.net)
 >
