@@ -51,7 +51,7 @@ go get github.com/joho/godotenv
 ### 编译 Build
 
 ```
-CGO_ENABLED=0 go build -ldflags '-s -w' -o comet-for-linux main.go
+CGO_ENABLED=0 go build -ldflags '-s -w' -o comet main.go
 ```
 
 mac上编译linux版本, build linux bin file on mac
@@ -60,12 +60,6 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -o comet-for-lin
 ```
 
 ## 运行 Run
-
-### 运行etcd Run etcd
-
-[run with docker](https://github.com/Gopusher/awesome/blob/master/docker/docker-compose.yml)
-
-当然你可以选择你喜欢的方式运行etcd.  Of course you can run etcd as the way you like.
 
 ### 配置 Configuration
 
