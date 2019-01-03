@@ -83,7 +83,7 @@ NOTIFICATION_USER_AGENT="Gopusher"
 1. Run comet
 
 ```
-./comet -c comet.ini
+./gateway -c .env
 ```
 到现在为止，你已经可以使用comet了，并采用你喜欢的语言进行接入开发你的长连接应用了。So far, you can already use comet service and develop your persistent connections application with your favorite program language.
 
