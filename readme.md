@@ -51,12 +51,12 @@ go get github.com/joho/godotenv
 ### 编译 Build
 
 ```
-CGO_ENABLED=0 go build -ldflags '-s -w' -o comet main.go
+CGO_ENABLED=0 go build -ldflags '-s -w' -o gateway main.go
 ```
 
 mac上编译linux版本, build linux bin file on mac
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -o comet-for-linux main.go
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -o gateway-for-linux main.go
 ```
 
 ## 运行 Run
