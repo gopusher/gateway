@@ -51,12 +51,12 @@ go get github.com/joho/godotenv
 ### 编译 Build
 
 ```
-CGO_ENABLED=0 go build -ldflags '-s -w' -o gateway main.go
+CGO_ENABLED=0 go build -ldflags '-s -w' -o gopusher main.go
 ```
 
 mac上编译linux版本, build linux bin file on mac
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -o gateway-for-linux main.go
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -o gopusher-for-linux main.go
 ```
 
 ## 运行 Run
@@ -80,12 +80,12 @@ NOTIFICATION_USER_AGENT="Gopusher"
 ```
 
 ### 运行 Run
-1. Run comet
+1. Run Gopusher
 
 ```
-./gateway -c .env
+./gopusher -c .env
 ```
-到现在为止，你已经可以使用comet了，并采用你喜欢的语言进行接入开发你的长连接应用了。So far, you can already use comet service and develop your persistent connections application with your favorite program language.
+到现在为止，你已经可以使用gopusher了，并采用你喜欢的语言进行接入开发你的长连接应用了。So far, you can already use gopusher service and develop your persistent connections application with your favorite program language.
 
 ### 集群配置 Cluster configuration 
 
