@@ -113,3 +113,15 @@ server {
 
 你也可以采用服务器下发 gopusher ip port 的方式来进行负载均衡，you can also use the method of sending the gopusher ip port to load balance.
 
+### SEO Strings
+Words 'chat' and 'instant messaging' in Chinese, Russian, Persian and a few other languages.
+
+聊天室 即時通訊
+чат мессенджер
+インスタントメッセージ
+인스턴트 메신저
+پیام‌رسانی فوری گپ
+تراسل فوري
+Nhắn tin tức thời
+Mensageiro instantâneo
+Pesan instan
