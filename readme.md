@@ -116,12 +116,12 @@ server {
 ### SEO Strings
 Words 'chat' and 'instant messaging' in Chinese, Russian, Persian and a few other languages.
 
-聊天室 即時通訊
-чат мессенджер
-インスタントメッセージ
-인스턴트 메신저
-پیام‌رسانی فوری گپ
-تراسل فوري
-Nhắn tin tức thời
-Mensageiro instantâneo
-Pesan instan
+* 聊天室 即時通訊
+* чат мессенджер
+* インスタントメッセージ
+* 인스턴트 메신저
+* پیام‌رسانی فوری گپ
+* تراسل فوري
+* Nhắn tin tức thời
+* Mensageiro instantâneo
+* Pesan instan
