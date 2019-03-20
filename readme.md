@@ -125,3 +125,7 @@ Words 'chat' and 'instant messaging' in Chinese, Russian, Persian and a few othe
 * Nhắn tin tức thời
 * Mensageiro instantâneo
 * Pesan instan
+
+## Todo
+* 增加获取当前所有在线连接数接口
+* 增加服务运行状态接口：协程数，内存占用，当前连接数，服务运行开始时间，已经处理消息数等
