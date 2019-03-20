@@ -46,12 +46,12 @@ func (c Client) post(body []byte) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return "", errors.New(fmt.Sprintf("notify failed, url: %s, http code: %d, read body failed", c.url, resp.StatusCode))
+		return "", fmt.Errorf("notify failed, url: %s, http code: %d, read body failed", c.url, resp.StatusCode)
 	}
 
 	ret, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("notify failed, http code: %d, read body failed，error: %s", 200, err.Error()))
+		return "", fmt.Errorf("notify failed, http code: %d, read body failed，error: %s", 200, err.Error())
 	}
 
 	return string(ret), nil
@@ -87,7 +87,7 @@ func (c Client) Call(method string, args ...interface{}) (string, error) {
 
 	var retInfo RetInfo
 	if err := json.Unmarshal([]byte(ret), &retInfo); err != nil {
-		return "", errors.New(fmt.Sprintf("notify failed, parse body failed，type: %v, value: %s", reflect.TypeOf(ret), ret))
+		return "", fmt.Errorf("notify failed, parse body failed，type: %v, value: %s", reflect.TypeOf(ret), ret)
 	}
 
 	if retInfo.Code != 0 {
