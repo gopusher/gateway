@@ -1,10 +1,10 @@
 package comet
 
 import (
-	"github.com/gopusher/gateway/configuration"
-	"github.com/gopusher/gateway/contracts"
-	"github.com/gopusher/gateway/connection/websocket"
 	"github.com/gopusher/gateway/api"
+	"github.com/gopusher/gateway/configuration"
+	"github.com/gopusher/gateway/connection/websocket"
+	"github.com/gopusher/gateway/contracts"
 )
 
 func Run() {

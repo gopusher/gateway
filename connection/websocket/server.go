@@ -1,22 +1,22 @@
 package websocket
 
 import (
+	"errors"
+	"github.com/gopusher/gateway/configuration"
+	"github.com/gopusher/gateway/log"
+	"github.com/gopusher/gateway/notification"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"github.com/gopusher/gateway/configuration"
-	"errors"
-	"github.com/gopusher/gateway/notification"
-	"github.com/gopusher/gateway/log"
 	"time"
 )
 
 type Server struct {
-	config *configuration.CometConfig
-	rpc *notification.Client
-	upgrader websocket.Upgrader
-	register chan *Client
+	config     *configuration.CometConfig
+	rpc        *notification.Client
+	upgrader   websocket.Upgrader
+	register   chan *Client
 	unregister chan *Client
-	clients map[string]*Client
+	clients    map[string]*Client
 }
 
 func NewWebSocketServer(config *configuration.CometConfig) *Server {
@@ -30,12 +30,12 @@ func NewWebSocketServer(config *configuration.CometConfig) *Server {
 
 	rpc := notification.NewRpc(config.NotificationUrl, config.NotificationUserAgent)
 	return &Server{
-		config: config,
-		rpc: rpc,
-		upgrader: upgrader,
+		config:     config,
+		rpc:        rpc,
+		upgrader:   upgrader,
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		clients: make(map[string]*Client),
+		clients:    make(map[string]*Client),
 	}
 }
 
@@ -112,8 +112,8 @@ func (s Server) serveWs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := &Client{
-		conn: c,
-		send: make(chan []byte, 1024),
+		conn:   c,
+		send:   make(chan []byte, 1024),
 		connId: connId,
 		server: s,
 	}
@@ -215,7 +215,7 @@ func (s *Server) GetAllConnections() []string {
 
 func (s *Server) JoinCluster() {
 	//wait for rpc and ws server bootstrap
-	time.Sleep(time.Duration(5)*time.Second)
+	time.Sleep(time.Duration(5) * time.Second)
 	//notify router api server
 	if _, err := s.rpc.Call("JoinCluster", s.config.NodeId); err != nil {
 		log.Error("Gateway JoinCluster notification failed: %s", err.Error())

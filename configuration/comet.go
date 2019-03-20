@@ -1,25 +1,25 @@
 package configuration
 
 import (
-    "os"
-    "strings"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type CometConfig struct {
-	NodeId 					string
-	SocketProtocol			string
-	SocketPort				string
-	SocketCertFile			string
-	SocketKeyFile			string
+	NodeId         string
+	SocketProtocol string
+	SocketPort     string
+	SocketCertFile string
+	SocketKeyFile  string
 
-	NotificationUrl			string
-	NotificationUserAgent	string
+	NotificationUrl       string
+	NotificationUserAgent string
 
-	GatewayApiAddress		string
-	GatewayApiPort			string
-	GatewayApiToken			string
+	GatewayApiAddress string
+	GatewayApiPort    string
+	GatewayApiToken   string
 }
 
 func GetCometConfig() *CometConfig {
@@ -36,19 +36,19 @@ func GetCometConfig() *CometConfig {
 		notificationUserAgent = "Gopusher 1.0"
 	}
 
-	return &CometConfig {
+	return &CometConfig{
 		NodeId: nodeId,
 
 		SocketProtocol: os.Getenv("SOCKET_PROTOCOL"),
-		SocketPort: ":" + os.Getenv("SOCKET_PORT"),
+		SocketPort:     ":" + os.Getenv("SOCKET_PORT"),
 		SocketCertFile: os.Getenv("SOCKET_CERT_FILE"),
-		SocketKeyFile: os.Getenv("SOCKET_KEY_FILE"),
+		SocketKeyFile:  os.Getenv("SOCKET_KEY_FILE"),
 
 		GatewayApiAddress: gatewayApiAddress,
-		GatewayApiPort: ":" + gatewayApiAddressSlice[1:][0],
-		GatewayApiToken: os.Getenv("GATEWAY_API_TOKEN"),
+		GatewayApiPort:    ":" + gatewayApiAddressSlice[1:][0],
+		GatewayApiToken:   os.Getenv("GATEWAY_API_TOKEN"),
 
-		NotificationUrl: os.Getenv("NOTIFICATION_URL"),
+		NotificationUrl:       os.Getenv("NOTIFICATION_URL"),
 		NotificationUserAgent: notificationUserAgent,
 	}
 }

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
-	"github.com/gopusher/gateway/comet"
 	"flag"
+	"github.com/gopusher/gateway/comet"
 	"github.com/gopusher/gateway/log"
+	"github.com/joho/godotenv"
 )
 
 func main() {

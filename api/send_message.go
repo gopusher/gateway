@@ -2,7 +2,7 @@ package api
 
 type Message struct {
 	ConnectionsMessage
-	Msg 			string		`json:"msg"` 		//为一个json，里边包含 type 消息类型
+	Msg string `json:"msg"` //为一个json，里边包含 type 消息类型
 }
 
 func (s *Server) SendToConnections(message *Message, reply *string) error {
@@ -32,7 +32,7 @@ func (s *Server) SendToConnections(message *Message, reply *string) error {
 
 type BroadcastMessage struct {
 	TokenMessage
-	Msg 			string		`json:"msg"` 		//为一个json，里边包含 type 消息类型
+	Msg string `json:"msg"` //为一个json，里边包含 type 消息类型
 }
 
 func (s *Server) Broadcast(message *BroadcastMessage, reply *string) error {

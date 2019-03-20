@@ -1,26 +1,26 @@
 package api
 
 import (
-	"net/rpc"
-	"github.com/gopusher/gateway/contracts"
-	"net"
-	"net/rpc/jsonrpc"
-	"github.com/gopusher/gateway/log"
-	"github.com/gopusher/gateway/configuration"
 	"encoding/json"
+	"github.com/gopusher/gateway/configuration"
+	"github.com/gopusher/gateway/contracts"
+	"github.com/gopusher/gateway/log"
+	"net"
+	"net/rpc"
+	"net/rpc/jsonrpc"
 )
 
 type Server struct {
-	server 	contracts.Server
-	token 	string
-	nodeId 	string
+	server contracts.Server
+	token  string
+	nodeId string
 }
 
 func InitRpcServer(server contracts.Server, config *configuration.CometConfig) {
 	rpc.Register(&Server{
 		nodeId: config.NodeId,
 		server: server,
-		token: config.GatewayApiToken,
+		token:  config.GatewayApiToken,
 	})
 
 	listener, err := net.Listen("tcp", config.GatewayApiPort)
@@ -40,24 +40,24 @@ func InitRpcServer(server contracts.Server, config *configuration.CometConfig) {
 }
 
 type TokenMessage struct {
-	Token			string		`json:"token"` 		//作为消息发送鉴权
+	Token string `json:"token"` //作为消息发送鉴权
 }
 
 type ConnectionsMessage struct {
-	Connections		[]string	`json:"connections"`	//消息接受者
+	Connections []string `json:"connections"` //消息接受者
 	TokenMessage
 }
 
 type Response struct {
-	Connections		[]string	`json:"connections"`	//消息接受者
-	Error			string		`json:"error"`
+	Connections []string `json:"connections"` //消息接受者
+	Error       string   `json:"error"`
 }
 
 func (s *Server) checkToken(token string) string {
 	if token != s.token {
 		response, _ := json.Marshal(&Response{
-			Connections: 	[]string{},
-			Error:			"error token",
+			Connections: []string{},
+			Error:       "error token",
 		})
 
 		return string(response)
@@ -72,8 +72,8 @@ func (s *Server) success(connections []string) string {
 	}
 
 	response, _ := json.Marshal(&Response{
-		Connections:	connections,
-		Error:			"",
+		Connections: connections,
+		Error:       "",
 	})
 
 	return string(response)
@@ -85,8 +85,8 @@ func (s *Server) failure(connections []string, err string) string {
 	}
 
 	response, _ := json.Marshal(&Response{
-		Connections:	connections,
-		Error:			err,
+		Connections: connections,
+		Error:       err,
 	})
 
 	return string(response)
