@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+
 	"github.com/gopusher/gateway/comet"
 	"github.com/gopusher/gateway/log"
 	"github.com/joho/godotenv"

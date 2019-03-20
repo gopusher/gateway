@@ -1,8 +1,9 @@
 package websocket
 
 import (
-	"github.com/gorilla/websocket"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type Client struct {

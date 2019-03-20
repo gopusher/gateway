@@ -2,12 +2,13 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/gopusher/gateway/configuration"
-	"github.com/gopusher/gateway/contracts"
-	"github.com/gopusher/gateway/log"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+
+	"github.com/gopusher/gateway/configuration"
+	"github.com/gopusher/gateway/contracts"
+	"github.com/gopusher/gateway/log"
 )
 
 type Server struct {

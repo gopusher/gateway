@@ -2,12 +2,13 @@ package websocket
 
 import (
 	"errors"
+	"net/http"
+	"time"
+
 	"github.com/gopusher/gateway/configuration"
 	"github.com/gopusher/gateway/log"
 	"github.com/gopusher/gateway/notification"
 	"github.com/gorilla/websocket"
-	"net/http"
-	"time"
 )
 
 type Server struct {
