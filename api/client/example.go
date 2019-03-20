@@ -1,21 +1,21 @@
 package main
 
 import (
-	"net/rpc/jsonrpc"
-	"log"
 	"fmt"
+	"log"
+	"net/rpc/jsonrpc"
 	"os"
 )
 
 type Message struct {
-	Connections		[]string	`json"connections"`	//消息接受者
-	Msg 			string		`json"msg"` 		//为一个json，里边包含 type 消息类型
-	Token			string		`json"token"` 		//作为消息发送鉴权
+	Connections []string `json:"connections"` //消息接受者
+	Msg         string   `json:"msg"`         //为一个json，里边包含 type 消息类型
+	Token       string   `json:"token"`       //作为消息发送鉴权
 }
 
 type KickMessage struct {
-	Connections		[]string	`json"connections"`	//消息接受者
-	Token			string		`json"token"` 		//作为消息发送鉴权
+	Connections []string `json:"connections"` //消息接受者
+	Token       string   `json:"token"`       //作为消息发送鉴权
 }
 
 func main() {
@@ -38,8 +38,8 @@ func main() {
 	//发送消息
 	err2 := rpc.Call("Server.SendToConnections", &Message{
 		Connections: os.Args[2:],
-		Msg: os.Args[1],
-		Token: "token",
+		Msg:         os.Args[1],
+		Token:       "token",
 	}, &response)
 
 	//kick conns

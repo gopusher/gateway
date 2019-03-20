@@ -1,26 +1,27 @@
 package notification
 
 import (
+	"bytes"
 	"encoding/json"
-	"net/http"
 	"errors"
 	"fmt"
-	"bytes"
 	"io/ioutil"
+	"net/http"
 	"reflect"
+
 	"github.com/gopusher/gateway/log"
 )
 
 type Client struct {
-	url string
+	url       string
 	userAgent string
 }
 
 func NewRpc(url string, userAgent string) *Client {
 	log.Info("Notification url: %s, userAgent: %s", url, userAgent)
 
-	return &Client {
-		url: url,
+	return &Client{
+		url:       url,
 		userAgent: userAgent,
 	}
 }
@@ -43,7 +44,7 @@ func (c Client) post(body []byte) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return "", errors.New(fmt.Sprintf("notify failed, http code: %d, read body failed，error: %s", resp.StatusCode, err.Error()))
+		return "", errors.New(fmt.Sprintf("notify failed, url: %s, http code: %d, read body failed", c.url, resp.StatusCode))
 	}
 
 	ret, err := ioutil.ReadAll(resp.Body)
@@ -56,12 +57,12 @@ func (c Client) post(body []byte) (string, error) {
 
 func (c Client) Call(method string, args ...interface{}) (string, error) {
 	type RpcBody struct {
-		MethodName 	string	`json:"method"`
-		Args		[]interface{}	`json:"args"`
+		MethodName string        `json:"method"`
+		Args       []interface{} `json:"args"`
 	}
 	body, err := json.Marshal(&RpcBody{
 		MethodName: method,
-		Args: args,
+		Args:       args,
 	})
 	if err != nil {
 		return "", errors.New("notify failed, error: " + err.Error())
@@ -76,9 +77,9 @@ func (c Client) Call(method string, args ...interface{}) (string, error) {
 
 	//parse result
 	type RetInfo struct {
-		Code int `json"code"`
-		Data interface{} `json"data"`
-		Error string `json"error"`
+		Code  int         `json:"code"`
+		Data  interface{} `json:"data"`
+		Error string      `json:"error"`
 	}
 
 	var retInfo RetInfo
