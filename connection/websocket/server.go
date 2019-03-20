@@ -201,7 +201,7 @@ func (s *Server) KickAllConnections() {
 	}
 }
 
-//CheckConnectionsOnline check connections is online
+//CheckConnectionsOnline check connections is online.
 func (s *Server) CheckConnectionsOnline(connections []string) []string {
 	var onlineConnections []string
 	for _, connId := range connections {
