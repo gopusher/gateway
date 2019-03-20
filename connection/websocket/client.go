@@ -31,6 +31,7 @@ const (
 //	newline = []byte{'\n'}
 //)
 
+//Write write to client from message channel
 func (c *Client) Write() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
@@ -73,6 +74,7 @@ func (c *Client) Write() {
 	}
 }
 
+//Read from client
 func (c *Client) Read() {
 	defer func() {
 		c.server.unregister <- c
@@ -94,11 +96,13 @@ func (c *Client) Read() {
 	}
 }
 
+//Close client connection
 func (c *Client) Close() {
 	c.conn.Close()
 	return
 }
 
+//SendMessage send message to client
 func (c *Client) SendMessage(message string) bool {
 	return true
 }

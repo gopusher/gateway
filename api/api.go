@@ -11,12 +11,14 @@ import (
 	"github.com/gopusher/gateway/log"
 )
 
+//Server is api server
 type Server struct {
 	server contracts.Server
 	token  string
 	nodeId string
 }
 
+//InitRpcServer init rpc server
 func InitRpcServer(server contracts.Server, config *configuration.CometConfig) {
 	rpc.Register(&Server{
 		nodeId: config.NodeId,
@@ -40,15 +42,18 @@ func InitRpcServer(server contracts.Server, config *configuration.CometConfig) {
 	}
 }
 
+//TokenMessage is token type message
 type TokenMessage struct {
 	Token string `json:"token"` //作为消息发送鉴权
 }
 
+//ConnectionsMessage is a connection type message
 type ConnectionsMessage struct {
 	Connections []string `json:"connections"` //消息接受者
 	TokenMessage
 }
 
+//Response is api response
 type Response struct {
 	Connections []string `json:"connections"` //消息接受者
 	Error       string   `json:"error"`

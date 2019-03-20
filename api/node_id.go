@@ -1,5 +1,6 @@
 package api
 
+//GetNodeId get the comet node id
 func (s *Server) GetNodeId(message *TokenMessage, reply *string) error {
 	if err := s.checkToken(message.Token); err != "" {
 		*reply = err

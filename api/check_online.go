@@ -1,5 +1,6 @@
 package api
 
+//CheckConnectionsOnline check connections is online
 func (s *Server) CheckConnectionsOnline(message *ConnectionsMessage, reply *string) error {
 	if err := s.checkToken(message.Token); err != "" {
 		*reply = err
@@ -15,6 +16,7 @@ func (s *Server) CheckConnectionsOnline(message *ConnectionsMessage, reply *stri
 	return nil
 }
 
+//GetAllConnections returns all connections
 func (s *Server) GetAllConnections(message *TokenMessage, reply *string) error {
 	if err := s.checkToken(message.Token); err != "" {
 		*reply = err

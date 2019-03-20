@@ -12,11 +12,13 @@ import (
 	"github.com/gopusher/gateway/log"
 )
 
+//Client is notification client
 type Client struct {
 	url       string
 	userAgent string
 }
 
+//NewRpc returns a instance of notification client
 func NewRpc(url string, userAgent string) *Client {
 	log.Info("Notification url: %s, userAgent: %s", url, userAgent)
 
@@ -55,6 +57,7 @@ func (c Client) post(body []byte) (string, error) {
 	return string(ret), nil
 }
 
+//Call method for call remote method
 func (c Client) Call(method string, args ...interface{}) (string, error) {
 	type RpcBody struct {
 		MethodName string        `json:"method"`

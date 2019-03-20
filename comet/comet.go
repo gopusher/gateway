@@ -7,6 +7,7 @@ import (
 	"github.com/gopusher/gateway/contracts"
 )
 
+//Run the comet application
 func Run() {
 	config := configuration.GetCometConfig()
 

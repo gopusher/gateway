@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+//Server is websocket server
 type Server struct {
 	config     *configuration.CometConfig
 	rpc        *notification.Client
@@ -20,6 +21,7 @@ type Server struct {
 	clients    map[string]*Client
 }
 
+//NewWebSocketServer returns a instance of websocket server
 func NewWebSocketServer(config *configuration.CometConfig) *Server {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -40,6 +42,7 @@ func NewWebSocketServer(config *configuration.CometConfig) *Server {
 	}
 }
 
+//Run the websocket server
 func (s *Server) Run() {
 	go s.handleClients()
 
@@ -143,6 +146,7 @@ func (s Server) checkToken(query map[string][]string) (string, error) {
 	return connId, nil
 }
 
+//SendToConnection send message to connId
 func (s *Server) SendToConnection(connId string, msg string) error {
 	if client, ok := s.clients[connId]; ok {
 		select {
@@ -159,6 +163,7 @@ func (s *Server) SendToConnection(connId string, msg string) error {
 	return errors.New("send message failed, connection: " + connId + " not found")
 }
 
+//SendToConnections send message to connections
 func (s *Server) SendToConnections(connections []string, msg string) ([]string, error) {
 	var errIds []string
 	for _, connId := range connections {
@@ -173,12 +178,14 @@ func (s *Server) SendToConnections(connections []string, msg string) ([]string, 
 	return []string{}, nil
 }
 
+//Broadcast send message to all connections
 func (s *Server) Broadcast(msg string) {
 	for connId := range s.clients {
 		s.SendToConnection(connId, msg)
 	}
 }
 
+//KickConnections kick connections
 func (s *Server) KickConnections(connections []string) {
 	for _, connId := range connections {
 		if client, ok := s.clients[connId]; ok {
@@ -187,12 +194,14 @@ func (s *Server) KickConnections(connections []string) {
 	}
 }
 
+//KickAllConnections kick all connections
 func (s *Server) KickAllConnections() {
 	for _, client := range s.clients {
 		client.Close()
 	}
 }
 
+//check connections online
 func (s *Server) CheckConnectionsOnline(connections []string) []string {
 	var onlineConnections []string
 	for _, connId := range connections {
@@ -204,6 +213,7 @@ func (s *Server) CheckConnectionsOnline(connections []string) []string {
 	return onlineConnections
 }
 
+//GetAllConnections returns all connections
 func (s *Server) GetAllConnections() []string {
 	var connectionIds []string
 
@@ -214,6 +224,7 @@ func (s *Server) GetAllConnections() []string {
 	return connectionIds
 }
 
+//JoinCluster rpc notify gateway join cluster
 func (s *Server) JoinCluster() {
 	//wait for rpc and ws server bootstrap
 	time.Sleep(time.Duration(5) * time.Second)

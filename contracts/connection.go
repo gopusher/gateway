@@ -1,5 +1,6 @@
 package contracts
 
+//Server is comet server interface
 type Server interface {
 	Run()
 	SendToConnections(connections []string, msg string) ([]string, error)

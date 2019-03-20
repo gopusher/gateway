@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+//A CometConfig provides a Comet Config.
 type CometConfig struct {
 	NodeId         string
 	SocketProtocol string
@@ -22,6 +23,7 @@ type CometConfig struct {
 	GatewayApiToken   string
 }
 
+//GetCometConfig creates a instance of CometConfig
 func GetCometConfig() *CometConfig {
 	gatewayApiAddress := os.Getenv("GATEWAY_API_ADDRESS")
 	gatewayApiAddressSlice := strings.Split(gatewayApiAddress, ":")

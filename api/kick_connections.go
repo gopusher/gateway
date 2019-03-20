@@ -1,5 +1,6 @@
 package api
 
+//KickConnections kick connections
 func (s *Server) KickConnections(message *ConnectionsMessage, reply *string) error {
 	if err := s.checkToken(message.Token); err != "" {
 		*reply = err
@@ -12,6 +13,7 @@ func (s *Server) KickConnections(message *ConnectionsMessage, reply *string) err
 	return nil
 }
 
+//KickAllConnections kick all connections
 func (s *Server) KickAllConnections(message *TokenMessage, reply *string) error {
 	if err := s.checkToken(message.Token); err != "" {
 		*reply = err

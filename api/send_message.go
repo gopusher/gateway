@@ -1,10 +1,12 @@
 package api
 
+//Message is api message
 type Message struct {
 	ConnectionsMessage
 	Msg string `json:"msg"` //为一个json，里边包含 type 消息类型
 }
 
+//SendToConnections send message to connections
 func (s *Server) SendToConnections(message *Message, reply *string) error {
 	if err := s.checkToken(message.Token); err != "" {
 		*reply = err
@@ -30,11 +32,13 @@ func (s *Server) SendToConnections(message *Message, reply *string) error {
 	return nil
 }
 
+//BroadcastMessage is a broadcast type message
 type BroadcastMessage struct {
 	TokenMessage
 	Msg string `json:"msg"` //为一个json，里边包含 type 消息类型
 }
 
+//Broadcast send message to all connections
 func (s *Server) Broadcast(message *BroadcastMessage, reply *string) error {
 	if err := s.checkToken(message.Token); err != "" {
 		*reply = err
