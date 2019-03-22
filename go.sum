@@ -1,5 +1,3 @@
-github.com/gopusher/gateway v0.0.0-20190320113241-574fd419863d h1:EmET8JBECBX3G5QsqvSOnpdSEmynOauhDpmk6DZbAYI=
-github.com/gopusher/gateway v0.0.0-20190320113241-574fd419863d/go.mod h1:l10cSGAXzX83U7v6Pah8Mv1lMliz4BI35INGtkjEBiU=
 github.com/gorilla/websocket v1.4.0 h1:WDFjx/TMzVgy9VdMMQi2K2Emtwi2QcUQsztZ/zLaH/Q=
 github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
 github.com/joho/godotenv v1.3.0 h1:Zjp+RcGpHhGlrMbJzXTrZZPrWj+1vfm90La1wgB6Bhc=
