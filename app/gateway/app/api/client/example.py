@@ -47,27 +47,40 @@ class Rpc(object):
         msg_id = 0
         data['id'] = msg_id
         msg = json.dumps(data)
-        self.conn.sendall(msg.encode())
+
+        try:
+            self.conn.sendall(msg.encode())
+        except BrokenPipeError as e:
+            self.close()
+            raise e
+        except BaseException as e:
+            self.close()
+            raise Exception("rpc send message failed, error: " + str(e))
 
         resp = self.read_line()
+        # print(resp)
         if not resp:
             self.close()
             raise Exception("rpc 获取数据失败, Not resp, server gone")
 
-        resp = json.loads(resp)
+        try:
+            resp = json.loads(resp)
+        except BaseException as e:
+            # todo log
+            raise e
 
         if resp.get('id') != msg_id:
-            raise Exception("expected id=%s, received id=%s: %s"
-                            % (msg_id, resp.get('id'), resp.get('error')))
+            raise Exception("expected id=%s, received id=%s: %s" % (msg_id, resp.get('id'), resp.get('error')))
 
         if resp.get('error') is not None:
             raise Exception(resp.get('error'))
 
-        data = json.loads(resp.get('result'))
+        data = resp.get('result')
+
         if data['code'] != '0':
             raise Exception("rpc 获取数据失败: %s" % data['error'])
 
-        return data
+        return data['data']
 
     def read_line(self):
         # return self.conn.makefile().readline()
