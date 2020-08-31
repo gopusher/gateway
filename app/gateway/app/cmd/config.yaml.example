@@ -1,0 +1,36 @@
+app_name: gateway
+
+app_debug: true
+
+logging:
+    level: warn
+    log_file: ""
+
+api_server:
+    address: 0.0.0.0:8080
+    token: "token"
+
+redis:
+    default:
+        addr: 127.0.0.1:6379
+        password: ""
+        db: 0
+
+dingtalk:
+    default:
+        token: "xx"
+        secret: "yy"
+
+node: gateway-01
+
+server.websocket:
+    app_key: "app_key_1"
+    app_secret: "app_secret_1"
+    address: :8900
+    ssl: false
+    ssl_cert_file: ""
+    ssl_key_file: ""
+    client_id_alias: "client_id"
+    token_alias: "token"
+    time_alias: "time"
+    time_window: 5
