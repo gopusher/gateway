@@ -161,6 +161,7 @@ Words 'chat' and 'instant messaging' in Chinese, Russian, Persian and a few othe
 ## Todo
 * 增加 prometheus 的支持，如 当前所有在线连接数 等指标
 * 增加etcd服务注册
-* 增加对grpc的支持
+* 增加grpc的支持
+* 采用bucket分段锁方式优化群聊的广播
 * 增加服务运行状态接口：协程数，内存占用，当前连接数，服务运行开始时间，已经处理消息数等
 
