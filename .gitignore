@@ -1,3 +1,4 @@
 .idea
 .env
 config.yaml
+go.sum
